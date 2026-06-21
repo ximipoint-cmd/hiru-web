@@ -657,7 +657,7 @@
 
     <div class="contacto-email">
       <span class="eu-only role">Kontaktua</span><span class="es-only role">Contacto</span>
-      <a href="/cdn-cgi/l/email-protection#b3d8dcddc7d2d8c7c6d2f3dbdac1c69ddaddd5dc"><span class="__cf_email__" data-cfemail="375c585943565c434256775f5e4542195e595158">[email&#160;protected]</span></a>
+      <a id="contacto-mail" href="#"></a>
     </div>
 
   </div>
@@ -670,7 +670,7 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 function setLang(lang){
   document.body.classList.remove('lang-eu','lang-es');
   document.body.classList.add('lang-'+lang);
@@ -679,6 +679,19 @@ function setLang(lang){
     b.classList.toggle('active', b.dataset.lang === lang);
   });
 }
+
+/* Email construido en tiempo de ejecucion: nunca aparece como texto en el
+   HTML, asi ningun sistema de "ofuscacion" puede ocultarlo. */
+(function(){
+  var user = 'kontaktua';
+  var domain = 'hiru.info';
+  var addr = user + '@' + domain;
+  var a = document.getElementById('contacto-mail');
+  if (a) {
+    a.setAttribute('href', 'mailto:' + addr);
+    a.textContent = addr;
+  }
+})();
 </script>
 </body>
 </html>
