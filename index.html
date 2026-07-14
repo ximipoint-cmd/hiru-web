@@ -38,14 +38,18 @@
 
   /* TOP BAR */
   .topbar{
-    position:sticky;top:0;z-index:100;
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:transparent;
+    padding:14px 0;
+    transition:background .3s ease,border-color .3s ease,backdrop-filter .3s ease;
+  }
+  .topbar.scrolled{
     background:rgba(220,205,184,.96);
     backdrop-filter:blur(8px);
     border-bottom:1px solid rgba(110,95,71,.2);
-    padding:14px 0;
   }
   .topbar-inner{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.15em;text-transform:uppercase}
-  .topbar a{color:var(--marron);text-decoration:none;margin-left:24px;font-weight:700;font-size:10px}
+  .topbar a{color:var(--marron-oscuro);text-decoration:none;margin-left:24px;font-weight:700;font-size:10px;text-shadow:0 1px 6px rgba(239,227,202,.6)}
   .topbar a:hover{color:var(--rojo)}
   .topbar .brand{display:flex;align-items:center;margin-left:0;cursor:pointer;line-height:0}
   .topbar .brand .brand-logo{height:30px;width:auto;display:block}
@@ -56,23 +60,32 @@
 
   /* HERO */
   .hero{
-    min-height:100vh;
-    display:flex;flex-direction:column;justify-content:center;
-    padding:80px 0;border-bottom:none;position:relative;
+    min-height:100vh;min-height:100svh;
+    padding:0;border-bottom:none;position:relative;
+    display:flex;align-items:flex-end;overflow:hidden;
   }
-  .hero h1{
-    font-size:clamp(96px,18vw,260px);
-    color:var(--rojo);
-    line-height:.85;letter-spacing:-.02em;
-    margin-bottom:32px;
+  .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:pointer}
+  .hero-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(74,62,46,.28) 0%,rgba(74,62,46,.04) 40%,rgba(74,62,46,.55) 100%)}
+  .sound-toggle{
+    position:absolute;right:36px;bottom:36px;z-index:3;
+    display:inline-flex;align-items:center;gap:10px;
+    background:rgba(74,62,46,.45);border:1px solid rgba(239,227,202,.55);
+    color:var(--beige-claro);border-radius:999px;padding:12px 20px;cursor:pointer;
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:background .2s ease,border-color .2s ease;
   }
-  .hero .claim{
-    font-family:'Lora',serif;
-    font-size:clamp(28px,3.6vw,48px);
-    font-style:italic;color:var(--marron-oscuro);
-    max-width:780px;line-height:1.2;margin-bottom:48px;
+  .sound-toggle:hover{background:rgba(74,62,46,.65);border-color:var(--beige-claro)}
+  .sound-toggle svg{width:15px;height:15px;display:block}
+  .sound-toggle .ic-on{display:none}
+  .sound-toggle.on .ic-on{display:block}
+  .sound-toggle.on .ic-off{display:none}
+  .scroll-hint{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:22px;z-index:2;
+    font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:rgba(239,227,202,.85);
+    pointer-events:none;animation:hero-bob 2.4s ease-in-out infinite;
   }
-  .hero .sub{max-width:620px;font-size:17px;line-height:1.65;color:var(--marron)}
+  @keyframes hero-bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
   .hero-pillars{
     display:grid;grid-template-columns:repeat(3,1fr);gap:48px;
     margin-top:80px;padding-top:48px;border-top:1px solid rgba(110,95,71,.25);
@@ -152,7 +165,7 @@
     font-family:'Lora',serif;font-weight:700;font-size:20px;color:var(--marron-oscuro);
   }
   .alianza-actor .sub{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--marron);margin-top:4px}
-  .alianza-actor.center .name{color:var(--rojo);font-size:32px}
+  .alianza-actor.center .name{color:var(--rojo);font-size:20px}
   .alianza-sep{
     flex:0 0 60px;height:1px;background:var(--marron);opacity:.6;
   }
@@ -202,6 +215,8 @@
   /* CONTACTO */
   .contacto{text-align:center;padding:160px 0 120px}
   .contacto .contacto-logo{width:clamp(200px,26vw,340px);height:auto;display:block;margin:0 auto 36px}
+  /* Heartbeat on the granate part of the logo */
+
   .contacto .hiru-big{
     font-family:'Lora',serif;font-weight:700;color:var(--rojo);
     font-size:clamp(120px,16vw,220px);line-height:.85;margin-bottom:32px;letter-spacing:-.02em;
@@ -327,11 +342,16 @@
 
 <!-- HERO -->
 <section id="top" class="hero">
-  <div class="container">
-    <h1>HIRU</h1>
-    <p class="eu-only claim">Ikasgelatik lurraldera.<br>Ikaskuntza errealitate bihurtzen duen eredua.</p><p class="es-only claim">Del aula al territorio.<br>Un modelo que transforma el aprendizaje en realidad.</p>
-
-  </div>
+  <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="auto">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+  <div class="hero-shade"></div>
+  <button id="soundToggle" class="sound-toggle" type="button" aria-label="Sonido">
+    <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg>
+    <span class="eu-only">Soinua</span><span class="es-only">Sonido</span>
+  </button>
+  <div class="scroll-hint"><span class="eu-only">Korritu</span><span class="es-only">Desliza</span> ↓</div>
 </section>
 
 <!-- MAPA (slide 2) -->
@@ -629,10 +649,9 @@
         <div class="alianza-sep"></div>
 
         <div class="alianza-actor center">
-          <div class="logo">
-            <span style="font-family:'Lora',serif;font-weight:700;color:#B22A1E;font-size:54px;letter-spacing:.02em">HIRU</span>
-          </div>
-          <div class="eu-only sub" style="color:#B22A1E">Ikasgelatik lurraldera</div><div class="es-only sub" style="color:#B22A1E">Del aula al territorio</div>
+          <div class="logo"><svg viewBox="188 355 648 210" style="width:120px;height:auto" role="img" aria-label="HIRU"><g fill="none" stroke-width="9.2" stroke-linecap="round" stroke-linejoin="round"><path stroke="#4A3E2E" d="M211 540 L217 540 L222 540 L228 539 L234 539 L239 538 L245 536 L250 534 L255 531 L260 528 L265 524 L269 521 L273 516 L277 512 L281 508 L284 503 L287 498 L290 493 L294 488 L296 483 L299 478 L302 473 L304 468 L307 463 L310 458 L312 453 L315 447 L317 442 L319 437 L322 432 L324 427 L327 421 L329 416 L332 411 L334 406 L337 401 L340 396 L343 391 L347 386 L351 382 L355 379 L360 376 L365 374 L371 373 L377 374 L382 375 L388 378 L392 381 L397 385 L401 389 L405 393 L409 397 L413 401 L416 406 L420 410 L424 415 L427 419 L431 424 L434 429 L438 433 L442 438"/><path stroke="#4A3E2E" d="M585 438 L588 434 L592 429 L595 425 L599 420 L602 415 L606 411 L609 406 L613 402 L617 398 L621 393 L625 389 L629 385 L633 381 L638 378 L643 375 L648 374 L654 373 L660 374 L665 376 L670 379 L675 382 L679 386 L682 391 L685 396 L688 401 L691 406 L693 411 L696 416 L698 421 L701 427 L703 432 L706 437 L708 442 L711 447 L713 453 L716 458 L718 463 L721 468 L723 473 L726 478 L729 483 L732 488 L735 493 L738 498 L741 503 L744 508 L748 512 L752 516 L756 521 L760 524 L765 528 L769 531 L775 534 L780 536 L785 537 L791 539 L797 540 L802 540 L808 540 L814 540"/><path stroke="#B22A1E" d="M442 438 L444 443 L448 448 L452 453 L455 458 L459 464 L462 470 L465 475 L468 481 L470 487 L473 493 L474 499 L475 505 L476 512 L475 518 L474 524 L472 530 L468 536 L464 540 L458 544 L452 547 L446 548 L440 549 L434 549 L427 547 L421 545 L415 542 L410 538 L406 533 L404 527 L402 521 L402 515 L403 508 L404 502 L406 496 L408 490 L411 484 L414 479 L418 473 L421 468 L424 462 L428 457 L432 452 L436 447 L440 442 L443 437 L447 432 L451 427 L455 422 L459 417 L463 412 L467 407 L472 402 L476 398 L480 393 L485 388 L489 384 L494 380 L500 376 L506 374 L512 373 L519 374 L525 376 L530 379 L536 382 L540 387 L545 391 L549 396 L553 401 L558 406 L562 411 L566 416 L570 421 L574 426 L578 431 L582 436 L585 441 L589 446 L593 451 L597 456 L601 461 L604 467 L608 472 L611 478 L614 484 L617 489 L619 495 L621 501 L622 508 L623 514 L622 520 L621 527 L618 533 L615 538 L610 542 L604 545 L598 547 L592 549 L586 549 L579 548 L573 547 L567 544 L562 541 L557 536 L554 531 L551 525 L550 519 L549 512 L550 506 L551 500 L553 493 L555 487 L558 482 L561 476 L564 470 L567 465 L570 459 L574 454 L578 448 L581 443 L585 438"/></g></svg></div>
+          <div class="name" style="color:var(--rojo)">HIRU</div>
+          <div class="eu-only sub">Ikasgelatik lurraldera</div><div class="es-only sub">Del aula al territorio</div>
         </div>
 
         <div class="alianza-sep"></div>
@@ -682,6 +701,27 @@ function setLang(lang){
     b.classList.toggle('active', b.dataset.lang === lang);
   });
 }
+
+var heroVideo = document.getElementById('heroVideo');
+var soundBtn = document.getElementById('soundToggle');
+function toggleSound(){
+  if(!heroVideo) return;
+  heroVideo.muted = !heroVideo.muted;
+  if(!heroVideo.muted){ heroVideo.volume = 1; }
+  soundBtn.classList.toggle('on', !heroVideo.muted);
+}
+if(soundBtn) soundBtn.addEventListener('click', toggleSound);
+if(heroVideo) heroVideo.addEventListener('click', toggleSound);
+
+var topbarEl = document.querySelector('.topbar');
+var heroEl = document.getElementById('top');
+function updateTopbar(){
+  if(!topbarEl || !heroEl) return;
+  var threshold = heroEl.offsetHeight - 80;
+  topbarEl.classList.toggle('scrolled', window.scrollY > threshold);
+}
+window.addEventListener('scroll', updateTopbar, {passive:true});
+updateTopbar();
 
 /* Email construido en tiempo de ejecucion: nunca aparece como texto en el
    HTML, asi ningun sistema de "ofuscacion" puede ocultarlo. */
