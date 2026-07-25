@@ -66,8 +66,8 @@
   }
   .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:pointer}
   .hero-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(74,62,46,.28) 0%,rgba(74,62,46,.04) 40%,rgba(74,62,46,.55) 100%)}
+  .hero-controls{position:absolute;right:36px;bottom:36px;z-index:3;display:flex;align-items:center;gap:10px}
   .sound-toggle{
-    position:absolute;right:36px;bottom:36px;z-index:3;
     display:inline-flex;align-items:center;gap:10px;
     background:rgba(74,62,46,.45);border:1px solid rgba(239,227,202,.55);
     color:var(--beige-claro);border-radius:999px;padding:12px 20px;cursor:pointer;
@@ -80,6 +80,30 @@
   .sound-toggle .ic-on{display:none}
   .sound-toggle.on .ic-on{display:block}
   .sound-toggle.on .ic-off{display:none}
+  .fullscreen-toggle{
+    display:none;align-items:center;justify-content:center;
+    width:40px;height:40px;flex-shrink:0;
+    background:rgba(74,62,46,.45);border:1px solid rgba(239,227,202,.55);
+    color:var(--beige-claro);border-radius:999px;cursor:pointer;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:background .2s ease,border-color .2s ease;
+  }
+  .fullscreen-toggle:hover{background:rgba(74,62,46,.65);border-color:var(--beige-claro)}
+  .fullscreen-toggle svg{width:16px;height:16px;display:block}
+  @media(max-width:760px){
+    .fullscreen-toggle{display:inline-flex}
+  }
+  .hero-fs-overlay{position:fixed;inset:0;z-index:1000;background:#000;overflow:hidden}
+  .hero-fs-overlay[hidden]{display:none}
+  .hero-fs-video-slot{position:absolute;top:50%;left:50%;width:100vh;height:100vw;transform:translate(-50%,-50%) rotate(90deg)}
+  .hero-fs-video-slot video{width:100%;height:100%;object-fit:cover;display:block;cursor:default}
+  .hero-fs-close{
+    position:absolute;top:16px;right:16px;z-index:2;
+    width:40px;height:40px;border-radius:999px;
+    background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.4);color:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .hero-fs-close svg{width:18px;height:18px;display:block}
   .scroll-hint{
     position:absolute;left:50%;transform:translateX(-50%);bottom:22px;z-index:2;
     font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:rgba(239,227,202,.85);
@@ -345,13 +369,25 @@
     <source src="video.mp4" type="video/mp4">
   </video>
   <div class="hero-shade"></div>
-  <button id="soundToggle" class="sound-toggle" type="button" aria-label="Sonido">
-    <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-    <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg>
-    <span class="eu-only">Soinua</span><span class="es-only">Sonido</span>
-  </button>
+  <div class="hero-controls">
+    <button id="soundToggle" class="sound-toggle" type="button" aria-label="Sonido">
+      <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg>
+      <span class="eu-only">Soinua</span><span class="es-only">Sonido</span>
+    </button>
+    <button id="heroFsToggle" class="fullscreen-toggle" type="button" aria-label="Pantalla completa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    </button>
+  </div>
   <div class="scroll-hint"><span class="eu-only">Korritu</span><span class="es-only">Desliza</span> ↓</div>
 </section>
+
+<div id="heroFsOverlay" class="hero-fs-overlay" hidden>
+  <button id="heroFsClose" class="hero-fs-close" type="button" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div id="heroFsVideoSlot" class="hero-fs-video-slot"></div>
+</div>
 
 <!-- MAPA (slide 2) -->
 <section id="mapa">
@@ -711,6 +747,28 @@ function toggleSound(){
 }
 if(soundBtn) soundBtn.addEventListener('click', toggleSound);
 if(heroVideo) heroVideo.addEventListener('click', toggleSound);
+
+var heroFsBtn = document.getElementById('heroFsToggle');
+var heroFsClose = document.getElementById('heroFsClose');
+var heroFsOverlay = document.getElementById('heroFsOverlay');
+var heroFsSlot = document.getElementById('heroFsVideoSlot');
+var heroVideoHome = heroVideo ? heroVideo.parentNode : null;
+var heroVideoNextSibling = heroVideo ? heroVideo.nextSibling : null;
+
+function openHeroFs(){
+  if(!heroVideo || !heroFsOverlay || !heroFsSlot) return;
+  heroFsSlot.appendChild(heroVideo);
+  heroFsOverlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeHeroFs(){
+  if(!heroVideo || !heroVideoHome) return;
+  heroVideoHome.insertBefore(heroVideo, heroVideoNextSibling);
+  heroFsOverlay.hidden = true;
+  document.body.style.overflow = '';
+}
+if(heroFsBtn) heroFsBtn.addEventListener('click', openHeroFs);
+if(heroFsClose) heroFsClose.addEventListener('click', closeHeroFs);
 
 var topbarEl = document.querySelector('.topbar');
 var heroEl = document.getElementById('top');
