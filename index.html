@@ -741,6 +741,20 @@ function openHeroFs(){
 }
 if(heroFsBtn) heroFsBtn.addEventListener('click', openHeroFs);
 
+function fixIOSViewportZoom(){
+  var vp = document.querySelector('meta[name="viewport"]');
+  if(!vp) return;
+  var original = vp.getAttribute('content');
+  vp.setAttribute('content', original + ', maximum-scale=1.0');
+  setTimeout(function(){ vp.setAttribute('content', original); }, 300);
+}
+if(heroVideo){
+  heroVideo.addEventListener('webkitendfullscreen', fixIOSViewportZoom);
+  document.addEventListener('fullscreenchange', function(){
+    if(!document.fullscreenElement) fixIOSViewportZoom();
+  });
+}
+
 var topbarEl = document.querySelector('.topbar');
 var heroEl = document.getElementById('top');
 function updateTopbar(){
