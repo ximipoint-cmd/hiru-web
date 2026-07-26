@@ -748,10 +748,14 @@ function fixIOSViewportZoom(){
   vp.setAttribute('content', original + ', maximum-scale=1.0');
   setTimeout(function(){ vp.setAttribute('content', original); }, 300);
 }
+function onHeroFsExit(){
+  fixIOSViewportZoom();
+  if(heroVideo) heroVideo.play();
+}
 if(heroVideo){
-  heroVideo.addEventListener('webkitendfullscreen', fixIOSViewportZoom);
+  heroVideo.addEventListener('webkitendfullscreen', onHeroFsExit);
   document.addEventListener('fullscreenchange', function(){
-    if(!document.fullscreenElement) fixIOSViewportZoom();
+    if(!document.fullscreenElement) onHeroFsExit();
   });
 }
 
