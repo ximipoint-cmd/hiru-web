@@ -757,6 +757,9 @@ if(heroVideo){
   document.addEventListener('fullscreenchange', function(){
     if(!document.fullscreenElement) onHeroFsExit();
   });
+  heroVideo.addEventListener('pause', function(){
+    setTimeout(function(){ heroVideo.play(); }, 50);
+  });
 }
 
 var topbarEl = document.querySelector('.topbar');
