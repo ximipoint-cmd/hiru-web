@@ -408,10 +408,10 @@
   .alianza-actor:hover .logo{transform:scale(1.06)}
 
   /* Alianza y contacto: el isotipo se dibuja como una sola línea, de izquierda a
-     derecha. La máscara (.logo-mask, creada por JS) recorre el trazo continuo
-     pico izquierdo → lazo rojo → pico derecho y va descubriendo el logo. */
-  .logo-mask{stroke-dasharray:1;stroke-dashoffset:1}
-  .play .logo-mask{animation:h-draw 2.6s cubic-bezier(.45,.05,.35,1) .2s forwards}
+     derecha: pico izquierdo → lazo rojo → pico derecho, uno tras otro y a
+     velocidad constante. JS fija en cada tramo su longitud, duración y retardo. */
+  @keyframes logo-seg{to{stroke-dashoffset:0}}
+  .play .logo-seg{animation:logo-seg var(--dur,1s) linear var(--del,0s) forwards}
 
   @media(max-width:760px){
     .fases-track{display:none}
@@ -421,7 +421,7 @@
     html{scroll-behavior:auto}
     *,*::before,*::after{animation:none!important;transition:none!important}
     .js .rv{opacity:1;transform:none}
-    .js .g-draw,.logo-mask{stroke-dashoffset:0}
+    .js .g-draw{stroke-dashoffset:0}
     .js .g-pop,.js .g-fade,.js .mapa-pin,.js .venn .v-a,.js .venn .v-b,.js .venn .v-c,.js .circuito-svg .c-node{opacity:1}
     .js .fase-line,.js .alianza-sep{transform:none}
     .js .g-win{fill:#4A3E2E}
@@ -949,26 +949,25 @@ updateTopbar();
   window.addEventListener('resize', progress);
   progress();
 
-  // Isotipos que se dibujan: una máscara con el trazo continuo del logo
-  // (pico izquierdo → lazo rojo → pico derecho; los extremos coinciden)
-  var NS = 'http://www.w3.org/2000/svg';
-  each('.contacto-logo, .alianza-actor.center svg', function(svg, i){
-    var ps = svg.querySelectorAll('path'), g = svg.querySelector('g');
-    if(ps.length !== 3 || !g) return;
-    var d = ps[0].getAttribute('d') + ' ' + ps[2].getAttribute('d').replace(/^M/, 'L') + ' ' + ps[1].getAttribute('d').replace(/^M/, 'L');
-    var mask = document.createElementNS(NS, 'mask'), mp = document.createElementNS(NS, 'path');
-    mask.setAttribute('id', 'logoMask' + i);
-    mask.setAttribute('maskUnits', 'userSpaceOnUse');
-    mask.setAttribute('x', '180'); mask.setAttribute('y', '345');
-    mask.setAttribute('width', '664'); mask.setAttribute('height', '230');
-    mp.setAttribute('d', d);
-    mp.setAttribute('pathLength', '1');
-    mp.setAttribute('class', 'logo-mask');
-    mp.setAttribute('fill', 'none'); mp.setAttribute('stroke', '#fff'); mp.setAttribute('stroke-width', '24');
-    mp.setAttribute('stroke-linecap', 'round'); mp.setAttribute('stroke-linejoin', 'round');
-    mask.appendChild(mp);
-    svg.insertBefore(mask, svg.firstChild);
-    g.setAttribute('mask', 'url(#logoMask' + i + ')');
+  // Isotipos que se dibujan como una sola línea: pico izquierdo → lazo rojo →
+  // pico derecho (los extremos coinciden). Cada tramo dura en proporción a su
+  // longitud, así la punta avanza a velocidad constante. El hueco del patrón es
+  // más largo que el trazo y el desfase inicial cae dentro del hueco, para que
+  // no asome ningún punto del remate redondo antes de que llegue el trazo.
+  if(!reduce) each('.contacto-logo, .alianza-actor.center svg', function(svg){
+    var ps = svg.querySelectorAll('path');
+    if(ps.length !== 3 || !ps[0].getTotalLength) return;
+    var order = [ps[0], ps[2], ps[1]], lens = order.map(function(p){ return p.getTotalLength(); });
+    var total = lens.reduce(function(a, b){ return a + b; }, 0), dur = 2.6, t = 0.2;
+    order.forEach(function(p, k){
+      var L = lens[k], segDur = dur * L / total;
+      p.style.strokeDasharray = L + ' ' + (L + 10);
+      p.style.strokeDashoffset = L + 5;
+      p.style.setProperty('--dur', segDur + 's');
+      p.style.setProperty('--del', t + 's');
+      p.classList.add('logo-seg');
+      t += segDur;
+    });
   });
 
   // Contadores (≈ 5 M): suben hasta su valor y terminan con el texto original
