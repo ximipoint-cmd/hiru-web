@@ -407,10 +407,11 @@
   .alianza-actor .logo{transition:transform .45s cubic-bezier(.2,.7,.1,1)}
   .alianza-actor:hover .logo{transform:scale(1.06)}
 
-  /* Contacto: el isotipo se dibuja con su propio trazo */
-  .js .contacto-logo path,.js .alianza-actor.center svg path{stroke-dasharray:1;stroke-dashoffset:1}
-  .play .contacto-logo path,.play .alianza-actor.center svg path{animation:h-draw 2s cubic-bezier(.6,0,.2,1) .2s forwards}
-  .play .contacto-logo path:last-child,.play .alianza-actor.center svg path:last-child{animation-duration:2.4s;animation-delay:.9s}
+  /* Alianza y contacto: el isotipo se dibuja como una sola línea, de izquierda a
+     derecha. La máscara (.logo-mask, creada por JS) recorre el trazo continuo
+     pico izquierdo → lazo rojo → pico derecho y va descubriendo el logo. */
+  .logo-mask{stroke-dasharray:1;stroke-dashoffset:1}
+  .play .logo-mask{animation:h-draw 2.6s cubic-bezier(.45,.05,.35,1) .2s forwards}
 
   @media(max-width:760px){
     .fases-track{display:none}
@@ -420,7 +421,7 @@
     html{scroll-behavior:auto}
     *,*::before,*::after{animation:none!important;transition:none!important}
     .js .rv{opacity:1;transform:none}
-    .js .g-draw,.js .contacto-logo path,.js .alianza-actor.center svg path{stroke-dashoffset:0}
+    .js .g-draw,.logo-mask{stroke-dashoffset:0}
     .js .g-pop,.js .g-fade,.js .mapa-pin,.js .venn .v-a,.js .venn .v-b,.js .venn .v-c,.js .circuito-svg .c-node{opacity:1}
     .js .fase-line,.js .alianza-sep{transform:none}
     .js .g-win{fill:#4A3E2E}
@@ -948,8 +949,27 @@ updateTopbar();
   window.addEventListener('resize', progress);
   progress();
 
-  // Los isotipos que se dibujan necesitan cada trazo normalizado a longitud 1
-  each('.contacto-logo path, .alianza-actor.center svg path', function(p){ p.setAttribute('pathLength', '1'); });
+  // Isotipos que se dibujan: una máscara con el trazo continuo del logo
+  // (pico izquierdo → lazo rojo → pico derecho; los extremos coinciden)
+  var NS = 'http://www.w3.org/2000/svg';
+  each('.contacto-logo, .alianza-actor.center svg', function(svg, i){
+    var ps = svg.querySelectorAll('path'), g = svg.querySelector('g');
+    if(ps.length !== 3 || !g) return;
+    var d = ps[0].getAttribute('d') + ' ' + ps[2].getAttribute('d').replace(/^M/, 'L') + ' ' + ps[1].getAttribute('d').replace(/^M/, 'L');
+    var mask = document.createElementNS(NS, 'mask'), mp = document.createElementNS(NS, 'path');
+    mask.setAttribute('id', 'logoMask' + i);
+    mask.setAttribute('maskUnits', 'userSpaceOnUse');
+    mask.setAttribute('x', '180'); mask.setAttribute('y', '345');
+    mask.setAttribute('width', '664'); mask.setAttribute('height', '230');
+    mp.setAttribute('d', d);
+    mp.setAttribute('pathLength', '1');
+    mp.setAttribute('class', 'logo-mask');
+    mp.setAttribute('fill', 'none'); mp.setAttribute('stroke', '#fff'); mp.setAttribute('stroke-width', '24');
+    mp.setAttribute('stroke-linecap', 'round'); mp.setAttribute('stroke-linejoin', 'round');
+    mask.appendChild(mp);
+    svg.insertBefore(mask, svg.firstChild);
+    g.setAttribute('mask', 'url(#logoMask' + i + ')');
+  });
 
   // Contadores (≈ 5 M): suben hasta su valor y terminan con el texto original
   function counters(root){
