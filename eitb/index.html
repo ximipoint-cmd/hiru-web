@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>HIRU · Ikasgelatik lurraldera</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --beige:#DCCDB8; --crema:#EFE3CB; --marron:#6E5F47; --oscuro:#4A3E2E;
+  --rojo:#B22A1E; --rojo-hondo:#8C2018; --rojo-luz:#D65A48;
+  --noche:#231D16; --noche-2:#30281E; --arena:#BFAE93; --tinta:#14100C;
+  --serif:'Lora',Georgia,'Times New Roman',serif;
+  --sans:'Poppins','Helvetica Neue',Arial,sans-serif;
+  --s:1;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans);overflow:hidden}
+
+/* ---------- VISOR ---------- */
+.app{height:100%;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.deck{position:relative;width:calc(1600px * var(--s));height:calc(900px * var(--s));flex:none}
+.frame{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .55s ease,visibility 0s linear .55s;overflow:hidden}
+.frame.is-current{opacity:1;visibility:visible;transition:opacity .55s ease}
+.slide{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:hidden;transform:scale(var(--s));transform-origin:0 0;background:var(--beige);color:var(--oscuro)}
+
+.bar{flex:none;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--tinta);color:var(--arena);
+  font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+.bar button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--crema);background:transparent;
+  border:1px solid rgba(239,227,203,.28);border-radius:999px;padding:10px 16px;cursor:pointer}
+.bar button:hover{border-color:var(--crema)}
+.bar button:focus-visible,.frame:focus-visible{outline:2px solid var(--rojo-luz);outline-offset:3px}
+.bar .count{min-width:84px;text-align:center;font-variant-numeric:tabular-nums;color:var(--crema)}
+.progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(239,227,203,.08)}
+.progress i{display:block;height:100%;width:0;background:var(--rojo-luz);transition:width .5s ease}
+
+.stage.ov{align-items:flex-start;overflow:auto}
+.deck.ov{width:min(1400px,100%);height:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;padding-block:24px;padding-inline:16px}
+.deck.ov .frame{position:relative;inset:auto;aspect-ratio:16/9;max-width:100%;opacity:1;visibility:visible;cursor:pointer;border-radius:4px;transition:none}
+.deck.ov .frame:hover{outline:2px solid var(--rojo-luz)}
+
+/* ---------- RETÍCULA Y TIPOGRAFÍA ----------
+   Márgenes comunes: 104px a izquierda y derecha, cabecera a 88px, pie a 38px. */
+.in{position:absolute;left:104px;right:104px;top:88px;bottom:118px;display:flex;flex-direction:column}
+.eyebrow{font:700 15px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);margin:0 0 20px}
+.h2{font:700 50px/1.1 var(--serif);color:var(--oscuro);margin:0 0 18px;text-wrap:balance;max-width:1200px}
+.lead{font:italic 400 22px/1.5 var(--serif);color:var(--marron);margin:0;max-width:880px}
+.body{font:400 17px/1.65 var(--sans);color:var(--marron);margin:0 0 14px;max-width:620px}
+.body strong{color:var(--oscuro)}
+.note{font:italic 400 15px/1.5 var(--serif);color:var(--marron)}
+.foot{position:absolute;left:104px;right:104px;bottom:38px;display:flex;justify-content:space-between;align-items:center;
+  font:700 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--marron)}
+.foot svg{width:68px;height:22px;display:block}
+.foot .sn{font-variant-numeric:tabular-nums;min-width:68px;text-align:right}
+
+.dark{background:var(--noche);color:var(--crema);--logo-a:#EFE3CB;--logo-b:#D65A48}
+.dark::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%,rgba(255,240,215,.05),transparent 60%),radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.35))}
+.dark .eyebrow{color:var(--rojo-luz)}
+.dark .h2{color:var(--crema)}
+.dark .lead,.dark .body,.dark .note{color:var(--arena)}
+.dark .body strong{color:var(--crema)}
+.dark .foot{color:var(--arena)}
+.crema{background:var(--crema)}
+
+/* dos columnas: texto a la izquierda (arranca arriba), gráfico a la derecha (centrado) */
+.two{flex:1;min-height:0;display:grid;grid-template-columns:600px 1fr;gap:64px;align-items:start}
+.two > .gfx{align-self:center;justify-self:center;width:100%;display:flex;justify-content:center}
+
+.vf i{position:absolute;width:44px;height:44px;border-color:rgba(74,62,46,.35);border-style:solid;border-width:0}
+.vf i:nth-child(1){left:48px;top:44px;border-left-width:2px;border-top-width:2px}
+.vf i:nth-child(2){right:48px;top:44px;border-right-width:2px;border-top-width:2px}
+.vf i:nth-child(3){left:48px;bottom:84px;border-left-width:2px;border-bottom-width:2px}
+.vf i:nth-child(4){right:48px;bottom:84px;border-right-width:2px;border-bottom-width:2px}
+
+/* ---------- ANIMACIÓN (solo en la diapositiva activa; en reposo todo es visible) ---------- */
+@keyframes up{from{opacity:0;transform:translateY(28px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.35)}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes growY{from{transform:scaleY(0)}}
+@keyframes blink{50%{opacity:.15}}
+@keyframes pulse{from{transform:scale(1);opacity:.7}to{transform:scale(3);opacity:0}}
+@keyframes travel{from{left:0}to{left:calc(100% - 92px)}}
+@keyframes leave{to{transform:translateX(64px);opacity:.3}}
+@keyframes off{from{fill:#F6C96B}to{fill:#4A3E2E}}
+@keyframes bars{from{height:0}}
+@keyframes ripple{from{r:80;opacity:.8}to{r:330;opacity:0}}
+@keyframes vinA{from{transform:translate(-150px,-70px);opacity:0}}
+@keyframes vinB{from{transform:translate(150px,-70px);opacity:0}}
+@keyframes vinC{from{transform:translate(0,150px);opacity:0}}
+
+.play .up{animation:up .9s cubic-bezier(.2,.7,.1,1) both;animation-delay:var(--d,0s)}
+.play .fade{animation:fade 1.1s ease both;animation-delay:var(--d,0s)}
+.play .pop{animation:pop .7s cubic-bezier(.3,1.45,.5,1) both;animation-delay:var(--d,0s);transform-box:fill-box;transform-origin:center}
+.play .draw{stroke-dasharray:1;animation:draw 1.6s cubic-bezier(.6,0,.2,1) both;animation-delay:var(--d,0s)}
+.play .draw.ln{animation-duration:2.8s;animation-timing-function:cubic-bezier(.45,.05,.35,1)}
+.play .grow{animation:grow 1.1s cubic-bezier(.6,0,.2,1) both;animation-delay:var(--d,0s);transform-box:fill-box;transform-origin:left center}
+.play .growY{animation:growY .7s cubic-bezier(.6,0,.2,1) both;animation-delay:var(--d,0s);transform-box:fill-box;transform-origin:center top}
+.play .w{animation:up .8s cubic-bezier(.2,.7,.1,1) both;animation-delay:calc(var(--w0,.2s) + var(--i) * 75ms)}
+.w{display:inline-block}
+
+/* ---------- PORTADA ---------- */
+.cover{background:var(--noche)}
+.cover video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(35,29,22,.72),rgba(35,29,22,.45) 45%,rgba(35,29,22,.82))}
+.lb{position:absolute;left:0;right:0;height:84px;background:#0E0B08;z-index:2}
+.lb.t{top:0}.lb.b{bottom:0}
+.play .lb{animation:bars 1.2s cubic-bezier(.6,0,.2,1) both}
+.slate,.rec{position:absolute;top:32px;z-index:3;font:600 12px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--arena)}
+.slate{left:104px}
+.rec{right:104px;display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums}
+.rec i{width:10px;height:10px;border-radius:50%;background:var(--rojo-luz);animation:blink 1.2s steps(1) infinite}
+.cover-c{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 120px}
+.cover-logo{width:210px;height:68px}
+.wordmark{font:700 19px/1 var(--serif);letter-spacing:.3em;color:var(--crema);margin:16px 0 40px;padding-left:.3em}
+.cover h1{font:700 108px/1 var(--serif);color:var(--crema);margin:0 0 28px;letter-spacing:-.01em}
+.cover h1 em{font-style:italic;color:var(--rojo-luz)}
+.cover .sub{font:italic 400 27px/1.45 var(--serif);color:var(--crema);max-width:900px;margin:0 0 30px;opacity:.92}
+.cover .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;margin:0;font:600 12px/1 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--arena)}
+.cover .meta b{color:var(--crema);background:var(--rojo);padding:9px 14px;border-radius:999px;font-weight:700}
+.lb-cap{position:absolute;bottom:32px;z-index:3;font:600 11px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--arena)}
+.lb-cap.l{left:104px}.lb-cap.r{right:104px}
+
+/* ---------- LA HISTORIA ---------- */
+.mega{font:700 84px/1.06 var(--serif);color:var(--oscuro);margin:90px 0 48px;max-width:1250px;text-wrap:balance;letter-spacing:-.01em}
+.mega em{font-style:italic;color:var(--rojo);position:relative;display:inline-block}
+.mega em::after{content:"";position:absolute;left:0;right:0;bottom:-.02em;height:6px;background:var(--rojo);transform-origin:left center}
+.play .mega em::after{animation:grow 1s cubic-bezier(.6,0,.2,1) 1.4s both}
+
+/* ---------- TENSIONES ---------- */
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:56px;margin-top:36px}
+.t-card{border-top:2px solid var(--oscuro);padding-top:22px;display:flex;flex-direction:column}
+.t-num{font:700 13px/1 var(--sans);letter-spacing:.2em;color:var(--rojo);text-transform:uppercase;margin-bottom:10px}
+.t-g{height:210px;display:flex;align-items:center}
+.t-card h3{font:700 27px/1.2 var(--serif);color:var(--rojo);margin:14px 0 10px}
+.t-card p{font:400 15px/1.6 var(--sans);color:var(--marron);margin:0}
+.big{font:700 132px/1 var(--serif);color:var(--rojo);letter-spacing:-.03em;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:10px}
+.big small{font-size:.42em;letter-spacing:0;color:var(--oscuro)}
+.leave{transform-box:fill-box}
+.play .leave{animation:leave 1.4s cubic-bezier(.5,0,.2,1) 1.1s both}
+.win{fill:var(--oscuro)}
+.play .win{animation:off 1s ease both;animation-delay:var(--d,1s)}
+
+/* ---------- LA IDEA ---------- */
+.venn{width:100%;max-width:600px;height:auto;display:block}
+.play .vA{animation:vinA 1.2s cubic-bezier(.2,.7,.1,1) .2s both}
+.play .vB{animation:vinB 1.2s cubic-bezier(.2,.7,.1,1) .35s both}
+.play .vC{animation:vinC 1.2s cubic-bezier(.2,.7,.1,1) .5s both}
+
+/* ---------- FASES ---------- */
+.phases{position:relative;margin-top:88px}
+.phase-line{position:absolute;left:0;top:0;width:100%;height:22px;overflow:visible}
+.traveler{position:absolute;top:-50px;display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--oscuro);color:var(--crema);
+  border-radius:999px;font:700 11px/1 var(--sans);letter-spacing:.2em;animation:travel 9s ease-in-out infinite alternate}
+.traveler i{width:9px;height:9px;border-radius:50%;background:var(--rojo-luz);animation:blink 1.2s steps(1) infinite}
+.four{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+.four .dot{display:block;width:22px;height:22px;border-radius:50%;background:var(--rojo);margin-bottom:30px}
+.four .k{font:700 13px/1 var(--sans);letter-spacing:.2em;color:var(--rojo);text-transform:uppercase}
+.four h3{font:700 27px/1.2 var(--serif);color:var(--oscuro);margin:12px 0 10px}
+.four p{font:400 15px/1.6 var(--sans);color:var(--marron);margin:0 0 18px;min-height:96px}
+.cam{font:italic 400 15px/1.45 var(--serif);color:var(--oscuro);border-top:1px solid rgba(74,62,46,.25);padding-top:12px}
+.cam b{font:700 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);display:block;margin-bottom:6px;font-style:normal}
+
+/* ---------- CIRCUITO ---------- */
+.circ{width:100%;max-width:600px;height:auto;display:block}
+.lines{margin-top:8px}
+.lines p{font:400 25px/1.35 var(--serif);color:var(--crema);margin:0 0 12px}
+.lines p:last-child{color:var(--rojo-luz);font-style:italic;font-weight:700;margin-bottom:0}
+
+/* ---------- QUIÉN LO HABITA ---------- */
+@keyframes on{from{fill:#4A3E2E}}
+@keyframes arrive{from{transform:translateX(-180px);opacity:0}}
+.play .lit{animation:on .9s ease both;animation-delay:var(--d,0s)}
+.play .arrive{animation:arrive 1.6s cubic-bezier(.2,.7,.1,1) both;animation-delay:var(--d,0s)}
+.dest{width:100%;max-width:620px;height:auto;display:block;overflow:visible}
+.pts{list-style:none;margin:8px 0 0;padding:0;max-width:600px}
+.pts li{font:400 16px/1.55 var(--sans);color:var(--marron);padding:12px 0;border-top:1px solid rgba(74,62,46,.22)}
+.pts li:last-child{border-bottom:1px solid rgba(74,62,46,.22)}
+.pts b{display:block;font:700 19px/1.25 var(--serif);color:var(--oscuro);margin-bottom:3px}
+
+/* ---------- BENEFICIOS ---------- */
+.branch{width:100%;height:auto;display:block;overflow:visible;margin-top:10px}
+.five{display:grid;grid-template-columns:repeat(6,1fr);gap:24px}
+.ben{background:var(--beige);border-radius:14px;padding:22px 18px 24px;text-align:center}
+.ben h4{font:700 21px/1.2 var(--serif);color:var(--oscuro);margin:0 0 4px}
+.ben .who{display:block;font:700 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);margin-bottom:16px}
+.ben ul{list-style:none;margin:0;padding:0;text-align:left}
+.ben li{font:400 14px/1.5 var(--sans);color:var(--marron);padding:10px 0;border-top:1px solid rgba(74,62,46,.18)}
+.ben.eitb{background:var(--rojo)}
+.ben.eitb h4,.ben.eitb li{color:var(--crema)}
+.ben.eitb .who{color:var(--crema);opacity:.8}
+.ben.eitb li{border-color:rgba(239,227,203,.3)}
+
+/* ---------- ALIANZA ---------- */
+.ally{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;margin-top:64px;align-items:start}
+.ally .band{position:absolute;left:148px;right:20px;top:0;height:140px;border-radius:70px;background:var(--crema);transform-origin:center}
+.play .ally .band{transform-origin:center center}
+.actor{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center}
+.actor .logo{height:140px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.actor .logo span{display:flex;align-items:center;justify-content:center;width:140px;height:140px;border-radius:50%;background:var(--crema)}
+.actor .logo img{display:block;height:auto}
+.actor h3{font:700 30px/1.15 var(--serif);color:var(--oscuro);margin:0 0 6px}
+.actor .sub{font:700 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--marron);margin-bottom:16px}
+.actor p{font:400 16px/1.55 var(--sans);color:var(--marron);margin:0;max-width:340px}
+.actor.hub h3{color:var(--rojo)}
+.actor.hub .logo span{background:var(--rojo)}
+.ally-note{margin-top:auto;padding-top:22px;border-top:1px solid rgba(74,62,46,.22);font:400 16px/1.5 var(--sans);color:var(--marron)}
+.ally-note strong{color:var(--oscuro)}
+
+/* ---------- PRIMER CAPÍTULO ---------- */
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font:700 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.chip.ok{background:var(--rojo);color:var(--crema)}
+.chip.wait{border:1.5px dashed var(--marron);color:var(--marron)}
+.map{width:100%;max-width:700px;height:auto;display:block;overflow:visible}
+.ring{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-out infinite}
+.ring.late{animation-delay:1.2s}
+
+/* ---------- RODAJE ---------- */
+.gantt{position:absolute;left:104px;right:104px;top:300px;height:470px}
+.gantt svg{width:100%;height:100%;overflow:visible}
+
+/* ---------- PROTAGONISTAS ---------- */
+.prot{flex:1;min-height:0;display:grid;grid-template-columns:1fr 360px;gap:56px;align-items:center;margin-top:8px}
+.arcs{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;flex-direction:column;gap:26px}
+.legend > div{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
+.legend svg{width:44px;height:14px;margin-top:8px}
+.legend h4{font:700 22px/1.2 var(--serif);color:var(--oscuro);margin:0 0 6px}
+.legend p{font:400 14px/1.55 var(--sans);color:var(--marron);margin:0}
+
+/* ---------- FORMATO ---------- */
+.fmt{width:100%;height:auto;display:block;overflow:visible;margin-top:30px}
+.langs{display:flex;gap:16px;flex-wrap:wrap;margin-top:30px;align-items:center}
+.lang{display:flex;align-items:center;gap:12px;border:1px solid rgba(239,227,203,.3);border-radius:999px;padding:10px 20px 10px 10px;font:400 15px/1 var(--sans);color:var(--crema)}
+.lang b{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--rojo);font:700 13px/1 var(--sans);letter-spacing:.06em}
+.lang.sub b{background:transparent;border:1.5px solid var(--arena);color:var(--arena)}
+
+/* ---------- VENTANAS ---------- */
+.rings{width:100%;max-width:600px;height:auto;display:block;overflow:visible}
+.ripple{animation:ripple 3.6s ease-out infinite}
+.wins{list-style:none;margin:10px 0 0;padding:0;display:grid}
+.wins li{display:grid;grid-template-columns:52px 1fr;gap:16px;padding:13px 0;border-top:1px solid rgba(74,62,46,.22)}
+.wins li:last-child{border-bottom:1px solid rgba(74,62,46,.22)}
+.wins .n{font:700 32px/1 var(--serif);color:var(--rojo);font-variant-numeric:tabular-nums}
+.wins h4{font:700 20px/1.25 var(--serif);color:var(--oscuro);margin:0 0 3px}
+.wins p{font:400 14px/1.5 var(--sans);color:var(--marron);margin:0}
+
+/* ---------- POR QUÉ EITB ---------- */
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:56px;margin-top:44px}
+.why svg{width:150px;height:150px;display:block;margin-bottom:24px;overflow:visible}
+.why h3{font:700 28px/1.2 var(--serif);color:var(--oscuro);margin:0 0 12px}
+.why p{font:400 16px/1.6 var(--sans);color:var(--marron);margin:0}
+
+/* ---------- PASOS ---------- */
+.steps{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:64px;margin-top:64px}
+.steps svg{position:absolute;left:0;top:38px;width:100%;height:20px;overflow:visible}
+.step{position:relative}
+.step .n{width:96px;height:96px;border-radius:50%;background:var(--rojo);color:var(--crema);display:grid;place-items:center;font:700 44px/1 var(--serif);margin-bottom:28px}
+.step h3{font:700 32px/1.2 var(--serif);color:var(--oscuro);margin:0 0 12px}
+.step p{font:400 17px/1.6 var(--sans);color:var(--marron);margin:0;max-width:380px}
+
+/* ---------- CIERRE ---------- */
+.close-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.close-c h2{font:700 96px/1 var(--serif);color:var(--crema);margin:34px 0 44px}
+.contact{display:flex;gap:64px;flex-wrap:wrap;justify-content:center}
+.contact span{display:block;font:700 11px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--rojo-luz);margin-bottom:12px}
+.contact a,.contact b{font:400 20px/1.3 var(--serif);color:var(--crema);text-decoration:none;border-bottom:1px solid rgba(239,227,203,.35);user-select:all}
+.contact small{display:block;font:italic 400 16px/1.3 var(--serif);color:var(--arena);margin-bottom:6px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@page{size:1600px 900px;margin:0}
+@media print{
+  html,body{height:auto;overflow:visible;background:none}
+  .bar{display:none}
+  .stage{display:block;overflow:visible}
+  .deck,.deck.ov{width:1600px!important;height:auto!important;display:block;padding:0}
+  .frame{position:relative!important;inset:auto!important;width:1600px!important;height:900px!important;aspect-ratio:auto!important;opacity:1!important;visibility:visible!important;break-after:page;border-radius:0}
+  .slide{transform:none!important}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="hiru" viewBox="188 355 648 210">
+      <g fill="none" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+        <path style="stroke:var(--logo-a,#4A3E2E)" d="M211 540 L217 540 L222 540 L228 539 L234 539 L239 538 L245 536 L250 534 L255 531 L260 528 L265 524 L269 521 L273 516 L277 512 L281 508 L284 503 L287 498 L290 493 L294 488 L296 483 L299 478 L302 473 L304 468 L307 463 L310 458 L312 453 L315 447 L317 442 L319 437 L322 432 L324 427 L327 421 L329 416 L332 411 L334 406 L337 401 L340 396 L343 391 L347 386 L351 382 L355 379 L360 376 L365 374 L371 373 L377 374 L382 375 L388 378 L392 381 L397 385 L401 389 L405 393 L409 397 L413 401 L416 406 L420 410 L424 415 L427 419 L431 424 L434 429 L438 433 L442 438"/>
+        <path style="stroke:var(--logo-a,#4A3E2E)" d="M585 438 L588 434 L592 429 L595 425 L599 420 L602 415 L606 411 L609 406 L613 402 L617 398 L621 393 L625 389 L629 385 L633 381 L638 378 L643 375 L648 374 L654 373 L660 374 L665 376 L670 379 L675 382 L679 386 L682 391 L685 396 L688 401 L691 406 L693 411 L696 416 L698 421 L701 427 L703 432 L706 437 L708 442 L711 447 L713 453 L716 458 L718 463 L721 468 L723 473 L726 478 L729 483 L732 488 L735 493 L738 498 L741 503 L744 508 L748 512 L752 516 L756 521 L760 524 L765 528 L769 531 L775 534 L780 536 L785 537 L791 539 L797 540 L802 540 L808 540 L814 540"/>
+        <path style="stroke:var(--logo-b,#B22A1E)" d="M442 438 L444 443 L448 448 L452 453 L455 458 L459 464 L462 470 L465 475 L468 481 L470 487 L473 493 L474 499 L475 505 L476 512 L475 518 L474 524 L472 530 L468 536 L464 540 L458 544 L452 547 L446 548 L440 549 L434 549 L427 547 L421 545 L415 542 L410 538 L406 533 L404 527 L402 521 L402 515 L403 508 L404 502 L406 496 L408 490 L411 484 L414 479 L418 473 L421 468 L424 462 L428 457 L432 452 L436 447 L440 442 L443 437 L447 432 L451 427 L455 422 L459 417 L463 412 L467 407 L472 402 L476 398 L480 393 L485 388 L489 384 L494 380 L500 376 L506 374 L512 373 L519 374 L525 376 L530 379 L536 382 L540 387 L545 391 L549 396 L553 401 L558 406 L562 411 L566 416 L570 421 L574 426 L578 431 L582 436 L585 441 L589 446 L593 451 L597 456 L601 461 L604 467 L608 472 L611 478 L614 484 L617 489 L619 495 L621 501 L622 508 L623 514 L622 520 L621 527 L618 533 L615 538 L610 542 L604 545 L598 547 L592 549 L586 549 L579 548 L573 547 L567 544 L562 541 L557 536 L554 531 L551 525 L550 519 L549 512 L550 506 L551 500 L553 493 L555 487 L558 482 L561 476 L564 470 L567 465 L570 459 L574 454 L578 448 L581 443 L585 438"/>
+      </g>
+    </symbol>
+    <!-- Trazo continuo del isotipo, de principio a fin, para revelarlo como una única línea -->
+    <path id="hiruLine" pathLength="1" d="M211 540 L217 540 L222 540 L228 539 L234 539 L239 538 L245 536 L250 534 L255 531 L260 528 L265 524 L269 521 L273 516 L277 512 L281 508 L284 503 L287 498 L290 493 L294 488 L296 483 L299 478 L302 473 L304 468 L307 463 L310 458 L312 453 L315 447 L317 442 L319 437 L322 432 L324 427 L327 421 L329 416 L332 411 L334 406 L337 401 L340 396 L343 391 L347 386 L351 382 L355 379 L360 376 L365 374 L371 373 L377 374 L382 375 L388 378 L392 381 L397 385 L401 389 L405 393 L409 397 L413 401 L416 406 L420 410 L424 415 L427 419 L431 424 L434 429 L438 433 L442 438 L444 443 L448 448 L452 453 L455 458 L459 464 L462 470 L465 475 L468 481 L470 487 L473 493 L474 499 L475 505 L476 512 L475 518 L474 524 L472 530 L468 536 L464 540 L458 544 L452 547 L446 548 L440 549 L434 549 L427 547 L421 545 L415 542 L410 538 L406 533 L404 527 L402 521 L402 515 L403 508 L404 502 L406 496 L408 490 L411 484 L414 479 L418 473 L421 468 L424 462 L428 457 L432 452 L436 447 L440 442 L443 437 L447 432 L451 427 L455 422 L459 417 L463 412 L467 407 L472 402 L476 398 L480 393 L485 388 L489 384 L494 380 L500 376 L506 374 L512 373 L519 374 L525 376 L530 379 L536 382 L540 387 L545 391 L549 396 L553 401 L558 406 L562 411 L566 416 L570 421 L574 426 L578 431 L582 436 L585 441 L589 446 L593 451 L597 456 L601 461 L604 467 L608 472 L611 478 L614 484 L617 489 L619 495 L621 501 L622 508 L623 514 L622 520 L621 527 L618 533 L615 538 L610 542 L604 545 L598 547 L592 549 L586 549 L579 548 L573 547 L567 544 L562 541 L557 536 L554 531 L551 525 L550 519 L549 512 L550 506 L551 500 L553 493 L555 487 L558 482 L561 476 L564 470 L567 465 L570 459 L574 454 L578 448 L581 443 L585 438 L588 434 L592 429 L595 425 L599 420 L602 415 L606 411 L609 406 L613 402 L617 398 L621 393 L625 389 L629 385 L633 381 L638 378 L643 375 L648 374 L654 373 L660 374 L665 376 L670 379 L675 382 L679 386 L682 391 L685 396 L688 401 L691 406 L693 411 L696 416 L698 421 L701 427 L703 432 L706 437 L708 442 L711 447 L713 453 L716 458 L718 463 L721 468 L723 473 L726 478 L729 483 L732 488 L735 493 L738 498 L741 503 L744 508 L748 512 L752 516 L756 521 L760 524 L765 528 L769 531 L775 534 L780 536 L785 537 L791 539 L797 540 L802 540 L808 540 L814 540"/>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="none"/><line x1="0" y1="0" x2="0" y2="10" stroke="#D65A48" stroke-width="3"/>
+    </pattern>
+  </defs>
+</svg>
+
+<div class="app">
+<main class="stage" id="stage" aria-label="Presentación HIRU para EITB">
+<div class="deck" id="deck">
+
+<!-- ============ 1 · PORTADA ============ -->
+<div class="frame" tabindex="-1"><section class="slide cover dark" aria-label="Portada">
+  <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="/video.mp4" type="video/mp4">
+  </video>
+  <div class="shade"></div>
+  <div class="lb t"></div><div class="lb b"></div>
+  <div class="slate fade" style="--d:1s">HIRU · Dokumentala</div>
+  <div class="rec fade" style="--d:1.2s"><i></i>REC <span class="tc">00:00:00:00</span></div>
+  <div class="cover-c">
+    <svg class="cover-logo" viewBox="188 355 648 210" role="img" aria-label="HIRU">
+      <mask id="mkCover" maskUnits="userSpaceOnUse" x="180" y="345" width="664" height="230">
+        <use href="#hiruLine" class="draw ln" pathLength="1" style="--d:.3s" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+      </mask>
+      <g mask="url(#mkCover)" style="--logo-a:#EFE3CB;--logo-b:#D65A48"><use href="#hiru" x="188" y="355" width="648" height="210"/></g>
+    </svg>
+    <div class="wordmark up" style="--d:2.6s">HIRU</div>
+    <h1 class="words" style="--w0:2.7s">Ikasgelatik <em>lurraldera</em></h1>
+    <p class="sub up" style="--d:3.1s">Un documental sobre una generación de arquitectos vascos que recupera el patrimonio en desuso y lo abre a viajeros que conectan con el territorio y con su gente.</p>
+    <p class="meta up" style="--d:3.4s"><b>Propuesta de producción para EITB</b></p>
+  </div>
+  <div class="lb-cap l fade" style="--d:1.4s">Del aula al territorio</div>
+  <div class="lb-cap r fade" style="--d:1.4s">Euskara · 2026 — 2029</div>
+</section></div>
+
+<!-- ============ 2 · LA HISTORIA ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="La historia">
+  <div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="in">
+    <p class="eyebrow up">La historia</p>
+    <h2 class="mega words" style="--w0:.25s">El talento que forma Euskadi, <em>construyendo</em> Euskadi.</h2>
+    <p class="lead up" style="--d:1.7s;font-size:25px;max-width:960px">HIRU es el sistema que retiene ese talento: estudiantes de Arquitectura de la EHU recuperan patrimonio en desuso y lo convierten en alojamientos donde quien viaja no consume el territorio: lo habita, conoce a su gente y se lleva su historia. Este documental cuenta todo el recorrido, del aula al territorio, desde el primer día.</p>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 3 · TENSIONES ============ -->
+<div class="frame" tabindex="-1"><section class="slide crema" aria-label="Por qué ahora">
+  <div class="in">
+    <p class="eyebrow up">Por qué ahora</p>
+    <h2 class="h2 up" style="--d:.1s">Tres tensiones que hoy avanzan por separado en Euskadi</h2>
+    <div class="tri">
+      <div class="t-card up" style="--d:.3s">
+        <div class="t-num">01 · Turismo</div>
+        <div class="t-g">
+          <div>
+            <div class="big">≈<span data-count="5">5</span><small>M</small></div>
+            <svg width="300" height="54" viewBox="0 0 300 54" aria-hidden="true" style="display:block;margin-top:4px;overflow:visible">
+              <path class="draw" pathLength="1" style="--d:.9s" d="M2 50 C 80 46 150 36 210 22 L 280 6" fill="none" stroke="#B22A1E" stroke-width="3" stroke-linecap="round"/>
+              <path class="pop" style="--d:2.2s" d="M268 2 L290 2 L284 22 Z" fill="#B22A1E"/>
+            </svg>
+          </div>
+        </div>
+        <h3>Turismo en máximos</h3>
+        <p>Casi cinco millones de visitantes al año y un crecimiento de en torno al 4-5 % anual. La afluencia crece más rápido que la capacidad del territorio para integrarla.</p>
+      </div>
+      <div class="t-card up" style="--d:.45s">
+        <div class="t-num">02 · Talento</div>
+        <div class="t-g">
+          <svg width="340" height="190" viewBox="0 0 340 190" aria-hidden="true" style="overflow:visible">
+            <g fill="#4A3E2E">
+              <g transform="translate(40 100)"><circle cy="-38" r="17"/><path d="M-26 48 V10 a26 26 0 0 1 52 0 V48 Z"/></g>
+              <g transform="translate(110 100)"><circle cy="-38" r="17"/><path d="M-26 48 V10 a26 26 0 0 1 52 0 V48 Z"/></g>
+              <g transform="translate(180 100)"><circle cy="-38" r="17"/><path d="M-26 48 V10 a26 26 0 0 1 52 0 V48 Z"/></g>
+            </g>
+            <g class="leave"><g transform="translate(250 100)" fill="#B22A1E"><circle cy="-38" r="17"/><path d="M-26 48 V10 a26 26 0 0 1 52 0 V48 Z"/></g></g>
+            <text x="14" y="182" font-family="Poppins,Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#6E5F47">1 DE CADA 4 TITULADOS</text>
+          </svg>
+        </div>
+        <h3>Fuga de talento</h3>
+        <p>Uno de cada cuatro titulados acaba desarrollando su carrera fuera. Euskadi forma el talento con recursos públicos y lo capitaliza otro lugar.</p>
+      </div>
+      <div class="t-card up" style="--d:.6s">
+        <div class="t-num">03 · Patrimonio</div>
+        <div class="t-g">
+          <svg width="360" height="190" viewBox="0 0 360 190" aria-hidden="true">
+            <g stroke="#4A3E2E" stroke-width="2.5" fill="#DCCDB8" stroke-linejoin="round">
+              <path d="M10 160 V78 L60 40 L110 78 V160 Z"/>
+              <path d="M130 160 V64 L180 26 L230 64 V160 Z"/>
+              <path d="M250 160 V86 L300 50 L350 86 V160 Z"/>
+            </g>
+            <rect class="win" style="--d:.9s" x="30" y="92" width="18" height="22"/><rect class="win" style="--d:1.1s" x="72" y="92" width="18" height="22"/><rect class="win" style="--d:1.3s" x="48" y="126" width="24" height="34"/>
+            <rect class="win" style="--d:1.2s" x="150" y="80" width="18" height="22"/><rect class="win" style="--d:1.4s" x="192" y="80" width="18" height="22"/><rect class="win" style="--d:1.6s" x="168" y="120" width="24" height="40"/>
+            <rect class="win" style="--d:1.5s" x="270" y="98" width="18" height="22"/><rect class="win" style="--d:1.7s" x="312" y="98" width="18" height="22"/><rect class="win" style="--d:1.9s" x="288" y="128" width="24" height="32"/>
+            <g font-family="Poppins,Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.6" fill="#6E5F47" text-anchor="middle">
+              <text x="60" y="182">BIZKAIA</text><text x="180" y="182">GIPUZKOA</text><text x="300" y="182">ARABA</text>
+            </g>
+          </svg>
+        </div>
+        <h3>Patrimonio en desuso</h3>
+        <p>Edificios con valor histórico y cultural siguen cerrados en los tres territorios históricos, sin uso ni proyecto de futuro.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 4 · LA IDEA ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="La idea">
+  <div class="in">
+    <div class="two">
+      <div>
+        <p class="eyebrow up">La idea</p>
+        <h2 class="h2 up" style="--d:.1s">Donde había tres tensiones, HIRU propone un sistema</h2>
+        <p class="body up" style="--d:.3s">HIRU se sitúa en la intersección entre <strong>educación universitaria, turismo sostenible y patrimonio en desuso</strong>.</p>
+        <p class="body up" style="--d:.45s">Tres alojamientos singulares, uno en cada territorio histórico, diseñados y construidos por estudiantes de Arquitectura de la EHU. Cuando abren, los habitan viajeros que buscan el País Vasco real, lejos del turismo de masas y cerca de los vecinos. El documental lo cuenta desde dentro.</p>
+      </div>
+      <div class="gfx">
+        <svg class="venn" viewBox="0 0 640 650" role="img" aria-label="Diagrama: educación, turismo y patrimonio se cruzan en HIRU">
+          <defs>
+            <clipPath id="cA"><circle cx="250" cy="260" r="170"/></clipPath>
+            <clipPath id="cB"><circle cx="390" cy="260" r="170"/></clipPath>
+            <clipPath id="cC"><circle cx="320" cy="380" r="170"/></clipPath>
+          </defs>
+          <circle class="vA" cx="250" cy="260" r="170" fill="#B22A1E" fill-opacity=".14" stroke="#B22A1E" stroke-width="1.5"/>
+          <circle class="vB" cx="390" cy="260" r="170" fill="#B22A1E" fill-opacity=".14" stroke="#B22A1E" stroke-width="1.5"/>
+          <circle class="vC" cx="320" cy="380" r="170" fill="#B22A1E" fill-opacity=".14" stroke="#B22A1E" stroke-width="1.5"/>
+          <g class="fade" style="--d:1.5s"><g clip-path="url(#cA)"><g clip-path="url(#cB)"><g clip-path="url(#cC)"><rect width="640" height="650" fill="#8C2018"/></g></g></g></g>
+          <text class="pop" style="--d:1.9s" x="320" y="318" font-family="Lora,Georgia,serif" font-weight="700" font-size="34" fill="#EFE3CB" text-anchor="middle" letter-spacing="1.5">HIRU</text>
+          <g class="fade" style="--d:1.2s" stroke="#6E5F47" stroke-width="1.2">
+            <line x1="122" y1="116" x2="176" y2="176"/>
+            <line x1="518" y1="116" x2="464" y2="176"/>
+            <line x1="320" y1="500" x2="320" y2="586"/>
+          </g>
+          <g class="fade" style="--d:1.2s" font-family="Lora,Georgia,serif" font-weight="700" font-size="24" fill="#B22A1E">
+            <text x="116" y="96" text-anchor="end">Educación</text>
+            <text x="524" y="96">Turismo</text>
+            <text x="320" y="616" text-anchor="middle">Patrimonio</text>
+          </g>
+          <g class="fade" style="--d:1.3s" font-family="Poppins,Arial,sans-serif" font-size="11" fill="#6E5F47" letter-spacing="1.6">
+            <text x="116" y="114" text-anchor="end">ETSA · UPV/EHU</text><text x="524" y="114">SOSTENIBLE</text><text x="320" y="636" text-anchor="middle">EN DESUSO → VIVO</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 5 · EL SISTEMA (FASES) ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="El sistema">
+  <div class="in">
+    <p class="eyebrow up">El sistema</p>
+    <h2 class="h2 up" style="--d:.1s">Cuatro fases, con cámara desde la primera</h2>
+    <div class="phases">
+      <svg class="phase-line" viewBox="0 0 1392 22" preserveAspectRatio="none" aria-hidden="true">
+        <line class="draw" pathLength="1" style="--d:.3s" x1="11" y1="11" x2="1392" y2="11" stroke="#4A3E2E" stroke-width="2"/>
+      </svg>
+      <div class="traveler" aria-hidden="true"><i></i>REC</div>
+      <div class="four">
+        <div class="up" style="--d:.5s"><span class="dot pop" style="--d:.5s"></span><div class="k">Fase 01</div><h3>Activar el territorio</h3><p>Identificar, junto a las instituciones, patrimonio en desuso en cada territorio histórico.</p><div class="cam"><b>En cámara</b>Alcaldes, vecinos y edificios cerrados.</div></div>
+        <div class="up" style="--d:.8s"><span class="dot pop" style="--d:.8s"></span><div class="k">Fase 02</div><h3>Inspirar el talento</h3><p>Estudiantes de la ETSA proyectan dentro del Máster Habilitante, con concurso y premio.</p><div class="cam"><b>En cámara</b>El aula, las correcciones y el fallo.</div></div>
+        <div class="up" style="--d:1.1s"><span class="dot pop" style="--d:1.1s"></span><div class="k">Fase 03</div><h3>Construir con sentido</h3><p>El proyecto ganador se construye con criterios de sostenibilidad y sus autores son protagonistas de la obra.</p><div class="cam"><b>En cámara</b>Estudiantes y oficios vascos en obra.</div></div>
+        <div class="up" style="--d:1.4s"><span class="dot pop" style="--d:1.4s"></span><div class="k">Fase 04</div><h3>Habitar y compartir</h3><p>Los alojamientos abren a viajeros que conviven con el pueblo, y su retorno se queda en el territorio.</p><div class="cam"><b>En cámara</b>Los primeros huéspedes y la respuesta del pueblo.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 6 · EL CIRCUITO ============ -->
+<div class="frame" tabindex="-1"><section class="slide dark" aria-label="El circuito">
+  <div class="in">
+    <div class="two">
+      <div>
+        <p class="eyebrow up">El circuito</p>
+        <h2 class="h2 up" style="--d:.1s">Un sistema que se retroalimenta</h2>
+        <div class="lines">
+          <p class="up" style="--d:.5s">La universidad forma.</p>
+          <p class="up" style="--d:.7s">Los estudiantes proyectan.</p>
+          <p class="up" style="--d:.9s">El patrimonio se revitaliza.</p>
+          <p class="up" style="--d:1.1s">El alojamiento abre, creando un turismo consciente y sostenible.</p>
+          <p class="up" style="--d:1.3s">El retorno vuelve al territorio y a sus habitantes.</p>
+          <p class="up" style="--d:1.6s">El documental amplifica.</p>
+        </div>
+      </div>
+      <div class="gfx">
+        <svg class="circ" viewBox="0 0 600 600" role="img" aria-label="Circuito: aula, territorio, turismo y ciudadanía alrededor de HIRU">
+          <circle cx="300" cy="300" r="210" fill="none" stroke="#D65A48" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="4 6">
+            <animate attributeName="stroke-dashoffset" from="0" to="-10" dur="0.7s" repeatCount="indefinite"/>
+          </circle>
+          <path d="M 300 90 A 210 210 0 0 1 510 300 A 210 210 0 0 1 300 510 A 210 210 0 0 1 90 300 A 210 210 0 0 1 300 90" fill="none" stroke="#D65A48" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="24 76">
+            <animate attributeName="stroke-dashoffset" dur="9s" repeatCount="indefinite" calcMode="linear" values="0;-100"/>
+          </path>
+          <g><path d="M -9 -7 L 7 0 L -9 7 Z" fill="#D65A48"/>
+            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto" calcMode="linear" path="M 510 300 A 210 210 0 0 1 300 510 A 210 210 0 0 1 90 300 A 210 210 0 0 1 300 90 A 210 210 0 0 1 510 300"/></g>
+          <circle class="pop" style="--d:.2s" cx="300" cy="300" r="72" fill="#B22A1E"/>
+          <text class="pop" style="--d:.4s" x="300" y="311" font-family="Lora,Georgia,serif" font-weight="700" font-size="31" fill="#EFE3CB" text-anchor="middle">HIRU</text>
+          <g font-family="Lora,Georgia,serif" font-weight="700" font-size="15" text-anchor="middle">
+            <g class="pop" style="--d:.5s"><circle cx="300" cy="72" r="64" fill="#30281E" stroke="#D65A48" stroke-width="1.5"/><text x="300" y="70" fill="#EFE3CB">AULA</text><text x="300" y="90" font-family="Poppins,Arial,sans-serif" font-weight="400" font-size="10" fill="#BFAE93">ETSA · EHU</text></g>
+            <g class="pop" style="--d:.7s"><circle cx="528" cy="300" r="64" fill="#30281E" stroke="#D65A48" stroke-width="1.5"/><text x="528" y="298" fill="#EFE3CB">TERRITORIO</text><text x="528" y="318" font-family="Poppins,Arial,sans-serif" font-weight="400" font-size="10" fill="#BFAE93">patrimonio</text></g>
+            <g class="pop" style="--d:.9s"><circle cx="300" cy="528" r="64" fill="#30281E" stroke="#D65A48" stroke-width="1.5"/><text x="300" y="526" fill="#EFE3CB">TURISMO</text><text x="300" y="546" font-family="Poppins,Arial,sans-serif" font-weight="400" font-size="10" fill="#BFAE93">consciente y sostenible</text></g>
+            <g class="pop" style="--d:1.1s"><circle cx="72" cy="300" r="64" fill="#30281E" stroke="#D65A48" stroke-width="1.5"/><text x="72" y="298" fill="#EFE3CB">CIUDADANÍA</text><text x="72" y="318" font-family="Poppins,Arial,sans-serif" font-weight="400" font-size="10" fill="#BFAE93">orgullo común</text></g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 7 · EL DESTINO (TURISMO) ============
+     Eco de la diapositiva de tensiones: allí las ventanas se apagaban; aquí se encienden. -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Quién lo habita">
+  <div class="in">
+    <div class="two">
+      <div>
+        <p class="eyebrow up">Quién lo habita</p>
+        <h2 class="h2 up" style="--d:.1s;font-size:42px">Al final, alguien abre la puerta: viajeros que conectan con el territorio y con su gente</h2>
+        <ul class="pts">
+          <li class="up" style="--d:.3s"><b>Turismo con propósito</b>Pocos huéspedes, en zonas que hoy no reciben visitantes, lejos de la masificación.</li>
+          <li class="up" style="--d:.45s"><b>Una experiencia auténtica</b>Dormir en un edificio con historia y conocer el pueblo, su cocina y su gente desde dentro.</li>
+          <li class="up" style="--d:.6s"><b>Turismo y ciudadanía, de la mano</b>El retorno se queda en la economía local y los vecinos recuperan un edificio que vuelve a ser suyo.</li>
+          <li class="up" style="--d:.75s"><b>Llegan conociendo la historia</b>Quien reserva ya ha visto cómo se hizo: el documental es la puerta de entrada del viajero.</li>
+        </ul>
+      </div>
+      <div class="gfx">
+        <svg class="dest" viewBox="0 0 640 520" role="img" aria-label="Un edificio recuperado cuyas ventanas se encienden mientras llegan viajeros y se encuentran con los vecinos">
+          <line class="draw" pathLength="1" style="--d:.1s" x1="10" y1="440" x2="630" y2="440" stroke="#4A3E2E" stroke-width="2"/>
+          <g class="fade" style="--d:.2s">
+            <path d="M200 440 V230 L320 140 L440 230 V440 Z" fill="#EFE3CB" stroke="#4A3E2E" stroke-width="3" stroke-linejoin="round"/>
+          </g>
+          <rect class="lit" style="--d:.9s" x="230" y="256" width="36" height="44" fill="#F6C96B"/>
+          <rect class="lit" style="--d:1.1s" x="302" y="256" width="36" height="44" fill="#F6C96B"/>
+          <rect class="lit" style="--d:1.3s" x="374" y="256" width="36" height="44" fill="#F6C96B"/>
+          <rect class="lit" style="--d:1.6s" x="296" y="356" width="48" height="84" fill="#F6C96B"/>
+          <path class="fade" style="--d:2.4s" d="M140 340 Q320 -130 520 340" fill="none" stroke="#B22A1E" stroke-width="2" stroke-dasharray="6 7">
+            <animate attributeName="stroke-dashoffset" from="0" to="-26" dur="1.2s" repeatCount="indefinite"/>
+          </path>
+          <g class="arrive" style="--d:.6s" fill="#B22A1E">
+            <g transform="translate(110 440)"><circle cy="-62" r="12"/><path d="M-19 0 V-30 a19 19 0 0 1 38 0 V0 Z"/></g>
+            <g transform="translate(160 440)"><circle cy="-62" r="12"/><path d="M-19 0 V-30 a19 19 0 0 1 38 0 V0 Z"/></g>
+          </g>
+          <g fill="#4A3E2E">
+            <g class="pop" style="--d:1.8s"><g transform="translate(490 440)"><circle cy="-62" r="12"/><path d="M-19 0 V-30 a19 19 0 0 1 38 0 V0 Z"/></g></g>
+            <g class="pop" style="--d:2s"><g transform="translate(540 440)"><circle cy="-62" r="12"/><path d="M-19 0 V-30 a19 19 0 0 1 38 0 V0 Z"/></g></g>
+          </g>
+          <g class="fade" style="--d:2.2s" font-family="Poppins,Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle">
+            <text x="135" y="470" fill="#B22A1E">VIAJEROS</text>
+            <text x="515" y="470" fill="#6E5F47">VECINOS</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 8 · BENEFICIOS ============ -->
+<div class="frame" tabindex="-1"><section class="slide crema" aria-label="Qué gana cada uno">
+  <div class="in">
+    <p class="eyebrow up">Qué gana cada uno</p>
+    <h2 class="h2 up" style="--d:.1s">Una sola operación, un retorno propio para cada parte</h2>
+    <svg class="branch" viewBox="0 0 1392 150" aria-hidden="true">
+      <line class="draw" pathLength="1" style="--d:.5s" x1="696" y1="74" x2="696" y2="112" stroke="#4A3E2E" stroke-width="2"/>
+      <line class="draw" pathLength="1" style="--d:.8s" x1="696" y1="112" x2="106" y2="112" stroke="#4A3E2E" stroke-width="2"/>
+      <line class="draw" pathLength="1" style="--d:.8s" x1="696" y1="112" x2="1286" y2="112" stroke="#4A3E2E" stroke-width="2"/>
+      <g stroke="#4A3E2E" stroke-width="2">
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="106" y1="112" x2="106" y2="150"/>
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="342" y1="112" x2="342" y2="150"/>
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="578" y1="112" x2="578" y2="150"/>
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="814" y1="112" x2="814" y2="150"/>
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="1050" y1="112" x2="1050" y2="150"/>
+        <line class="draw" pathLength="1" style="--d:1.3s" x1="1286" y1="112" x2="1286" y2="150"/>
+      </g>
+      <circle class="pop" style="--d:.2s" cx="696" cy="40" r="38" fill="#B22A1E"/>
+      <text class="pop" style="--d:.35s" x="696" y="49" text-anchor="middle" font-family="Lora,Georgia,serif" font-weight="700" font-size="22" fill="#EFE3CB">HIRU</text>
+    </svg>
+    <div class="five">
+      <div class="ben up" style="--d:1.5s"><h4>Estudiantes</h4><span class="who">Máster Habilitante</span><ul><li>Su primer encargo profesional remunerado.</li><li>Proyección internacional de su trabajo.</li></ul></div>
+      <div class="ben up" style="--d:1.6s"><h4>EHU · ETSA</h4><span class="who">Universidad</span><ul><li>Una escuela donde los estudiantes construyen lo que proyectan.</li><li>Retiene y atrae talento joven.</li></ul></div>
+      <div class="ben up" style="--d:1.7s"><h4>Gobierno Vasco</h4><span class="who">Turismo</span><ul><li>Turismo sostenible en zonas nuevas, sin saturar.</li><li>Una iniciativa pionera que genera orgullo.</li></ul></div>
+      <div class="ben up" style="--d:1.8s"><h4>Territorio</h4><span class="who">Municipios y vecinos</span><ul><li>Patrimonio recuperado sin coste de restauración.</li><li>Economía local y orgullo compartido.</li></ul></div>
+      <div class="ben up" style="--d:1.9s"><h4>Viajeros</h4><span class="who">Turismo consciente</span><ul><li>Dormir en un edificio con historia y conocer el pueblo desde dentro.</li><li>Llegan conociendo la historia: el documental es su puerta de entrada.</li></ul></div>
+      <div class="ben eitb up" style="--d:2s"><h4>EITB</h4><span class="who">Producción</span><ul><li>Del aula al territorio: una historia vasca que merece ser contada.</li><li>Un arco real de tres años, en euskera, para antena, Primeran y festivales.</li></ul></div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 8 · ALIANZA ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Quién respalda">
+  <div class="in">
+    <p class="eyebrow up">Quién respalda</p>
+    <h2 class="h2 up" style="--d:.1s">Una alianza institucional a tres bandas</h2>
+    <div class="ally">
+      <div class="band grow" style="--d:.2s" aria-hidden="true"></div>
+      <div class="actor up" style="--d:.3s">
+        <div class="logo"><span><img src="/eitb/assets/logo-ehu.png" alt="Logotipo de la UPV/EHU" width="92"></span></div>
+        <h3>EHU</h3><div class="sub">UPV/EHU · ETSA</div>
+        <p>Marco académico: el concurso se integra en el Máster Habilitante en Arquitectura.</p>
+      </div>
+      <div class="actor hub up" style="--d:.5s">
+        <div class="logo"><span><svg width="104" height="34" style="--logo-a:#EFE3CB;--logo-b:#EFE3CB" role="img" aria-label="HIRU"><use href="#hiru"/></svg></span></div>
+        <h3>HIRU</h3><div class="sub">Del aula al territorio</div>
+        <p>Impulsa y coordina el sistema: emplazamientos, concurso, obra, apertura y documental.</p>
+      </div>
+      <div class="actor up" style="--d:.7s">
+        <div class="logo"><img src="/eitb/assets/logo-gv.png" alt="Logotipo del Gobierno Vasco" width="360"></div>
+        <h3>Gobierno Vasco</h3><div class="sub">Departamento de Turismo</div>
+        <p>Respaldo institucional desde la Viceconsejería de Turismo y premio para el proyecto ganador.</p>
+      </div>
+    </div>
+    <p class="ally-note up" style="--d:1.2s">Con el <strong>Ayuntamiento de Erandio</strong>, que ofrece el antiguo albergue de Akarlanda para el primer alojamiento.</p>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 9 · PRIMER CAPÍTULO ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Primer capítulo">
+  <div class="in">
+    <div class="two" style="grid-template-columns:520px 1fr">
+      <div>
+        <p class="eyebrow up">Primer capítulo</p>
+        <h2 class="h2 up" style="--d:.1s">Empezamos en Akarlanda, Erandio</h2>
+        <p class="body up" style="--d:.3s">El Ayuntamiento de Erandio ofrece el <strong>antiguo albergue del parque de Akarlanda</strong>. Sobre él trabajan este curso 2026-27 los estudiantes del Máster Habilitante, y ahí se construirá el proyecto ganador.</p>
+        <p class="body up" style="--d:.45s">Gipuzkoa y Araba vienen después, con su construcción en 2027-28. Tres territorios, tres alojamientos: un <strong>hiruki</strong>, el triángulo que da sentido a HIRU.</p>
+        <div class="up" style="--d:.6s;display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><span class="chip ok">Bizkaia · confirmado</span><span class="chip wait">Gipuzkoa · en búsqueda</span><span class="chip wait">Araba · en búsqueda</span></div>
+      </div>
+      <div class="gfx">
+        <svg class="map" viewBox="-20 -60 852 690" role="img" aria-label="Mapa de Euskadi con el triángulo que une los tres territorios y Erandio confirmado">
+          <image class="fade" style="--d:.1s" href="/eitb/assets/euskadi.png" x="0" y="0" width="812" height="603"/>
+          <path class="draw" pathLength="1" style="--d:.8s" d="M228 98 L536 150 L406 393 Z" fill="#B22A1E" fill-opacity=".08" stroke="#B22A1E" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle class="ring" cx="228" cy="98" r="14" fill="none" stroke="#B22A1E" stroke-width="2"/>
+          <circle class="ring late" cx="228" cy="98" r="14" fill="none" stroke="#B22A1E" stroke-width="2"/>
+          <circle class="pop" style="--d:1s" cx="228" cy="98" r="14" fill="#B22A1E" stroke="#EFE3CB" stroke-width="3"/>
+          <circle class="pop" style="--d:1.3s" cx="536" cy="150" r="12" fill="#EFE3CB" stroke="#6E5F47" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <circle class="pop" style="--d:1.5s" cx="406" cy="393" r="12" fill="#EFE3CB" stroke="#6E5F47" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <g class="up" style="--d:1.4s" font-family="Poppins,Arial,sans-serif">
+            <line x1="228" y1="80" x2="228" y2="-8" stroke="#B22A1E" stroke-width="1.5"/>
+            <text x="238" y="-34" font-weight="700" font-size="13" letter-spacing="2.4" fill="#4A3E2E">BIZKAIA</text>
+            <text x="238" y="-10" font-family="Lora,Georgia,serif" font-style="italic" font-size="21" fill="#B22A1E">Akarlanda · Erandio</text>
+            <text x="556" y="146" font-weight="700" font-size="13" letter-spacing="2.4" fill="#4A3E2E">GIPUZKOA</text>
+            <text x="556" y="168" font-size="13" fill="#6E5F47">edificio por encontrar</text>
+            <text x="426" y="390" font-weight="700" font-size="13" letter-spacing="2.4" fill="#4A3E2E">ARABA</text>
+            <text x="426" y="412" font-size="13" fill="#6E5F47">edificio por encontrar</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 10 · EL RODAJE ============ -->
+<div class="frame" tabindex="-1"><section class="slide dark" aria-label="Qué se rueda y cuándo">
+  <div class="in">
+    <p class="eyebrow up">Qué se rueda y cuándo</p>
+    <h2 class="h2 up" style="--d:.1s">Un rodaje longitudinal que sigue el proceso real</h2>
+    <p class="lead up" style="--d:.2s;font-size:20px">Calendario orientativo, sincronizado con los hitos del proyecto.</p>
+  </div>
+  <div class="gantt">
+    <svg viewBox="0 0 1392 470" role="img" aria-label="Calendario de rodaje de septiembre de 2026 a junio de 2029">
+      <g font-family="Poppins,Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#BFAE93">
+        <text x="200" y="20">SEP 2026</text><text x="336" y="20">2027</text><text x="761" y="20">2028</text><text x="1186" y="20">2029</text>
+      </g>
+      <g stroke="#EFE3CB" stroke-opacity=".14" stroke-width="1">
+        <line x1="200" y1="34" x2="200" y2="452"/><line x1="336" y1="34" x2="336" y2="452"/><line x1="761" y1="34" x2="761" y2="452"/><line x1="1186" y1="34" x2="1186" y2="452"/>
+      </g>
+      <g font-family="Poppins,Arial,sans-serif" font-size="15" fill="#EFE3CB">
+        <text x="0" y="75">La búsqueda</text>
+        <text x="0" y="131">El curso</text>
+        <text x="0" y="187">El fallo</text>
+        <text x="0" y="243">La obra</text>
+        <text x="0" y="299">Rodaje</text>
+        <text x="0" y="355">Postproducción</text>
+        <text x="0" y="411">Estreno</text>
+      </g>
+      <rect class="grow" style="--d:.4s" x="200" y="56" width="142" height="26" rx="4" fill="#D65A48"/>
+      <text class="fade" style="--d:1.3s" x="354" y="75" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#BFAE93">sep – dic 2026 · patrimonio, alcaldes y vecinos</text>
+      <rect class="grow" style="--d:.6s" x="271" y="112" width="213" height="26" rx="4" fill="#D65A48"/>
+      <text class="fade" style="--d:1.5s" x="496" y="131" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#BFAE93">nov 2026 – abr 2027 · estudiantes proyectando</text>
+      <rect class="grow" style="--d:.8s" x="342" y="168" width="425" height="26" rx="4" fill="none" stroke="#D65A48" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text class="fade" style="--d:1.7s" x="779" y="187" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#BFAE93">2027 · fecha por confirmar con la ETSA</text>
+      <rect class="grow" style="--d:1s" x="342" y="224" width="425" height="26" rx="4" fill="none" stroke="#D65A48" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <rect class="grow" style="--d:1.2s" x="767" y="224" width="425" height="26" rx="4" fill="url(#hatch)" stroke="#D65A48" stroke-width="1.5"/>
+      <text class="fade" style="--d:1.9s" x="352" y="243" font-family="Poppins,Arial,sans-serif" font-size="12" fill="#BFAE93">inicio por definir</text>
+      <rect class="grow" style="--d:.2s" x="200" y="286" width="992" height="10" rx="5" fill="#EFE3CB"/>
+      <text class="fade" style="--d:1.9s" x="1204" y="299" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#BFAE93">86 – 105 días · 6 bloques</text>
+      <rect class="grow" style="--d:1.4s" x="1186" y="336" width="177" height="26" rx="4" fill="#EFE3CB" fill-opacity=".85"/>
+      <text class="fade" style="--d:2s" x="1174" y="355" text-anchor="end" font-family="Poppins,Arial,sans-serif" font-size="13" fill="#BFAE93">ene – may 2029</text>
+      <path class="pop" style="--d:2.1s" d="M1384 382 L1400 398 L1384 414 L1368 398 Z" fill="#D65A48"/>
+      <text class="fade" style="--d:2.2s" x="1356" y="411" text-anchor="end" font-family="Lora,Georgia,serif" font-style="italic" font-size="17" fill="#EFE3CB">junio 2029 · previsto</text>
+      <g class="fade" style="--d:.6s">
+        <line x1="233" y1="34" x2="233" y2="452" stroke="#D65A48" stroke-width="2"/>
+        <rect x="205" y="440" width="56" height="24" rx="12" fill="#D65A48"/>
+        <text x="233" y="457" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.8" fill="#EFE3CB">HOY</text>
+      </g>
+    </svg>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 11 · PROTAGONISTAS ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Quién protagoniza">
+  <div class="in">
+    <p class="eyebrow up">Quién protagoniza</p>
+    <h2 class="h2 up" style="--d:.1s">Una generación, un oficio y un territorio</h2>
+    <div class="prot">
+      <svg class="arcs" viewBox="0 0 960 440" role="img" aria-label="Arcos narrativos ilustrativos: los tres protagonistas se encuentran en la obra">
+        <g stroke="#4A3E2E" stroke-opacity=".18" stroke-dasharray="3 6">
+          <line x1="60" y1="30" x2="60" y2="380"/><line x1="270" y1="30" x2="270" y2="380"/><line x1="480" y1="30" x2="480" y2="380"/><line x1="690" y1="30" x2="690" y2="380"/><line x1="900" y1="30" x2="900" y2="380"/>
+        </g>
+        <line x1="40" y1="380" x2="920" y2="380" stroke="#4A3E2E" stroke-opacity=".4"/>
+        <g font-family="Poppins,Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.8" fill="#6E5F47" text-anchor="middle">
+          <text x="60" y="408">LA BÚSQUEDA</text><text x="270" y="408">EL CURSO</text><text x="480" y="408">EL FALLO</text><text x="690" y="408">LA OBRA</text><text x="900" y="408">LA APERTURA</text>
+        </g>
+        <path class="fade" style="--d:.6s" d="M60 250 C 200 226 360 300 480 286 S 640 196 690 170 S 820 60 900 44" fill="none" stroke="#6E5F47" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" style="--d:.9s" d="M60 356 C 300 360 520 334 600 262 S 668 184 690 170 S 830 146 900 118" fill="none" stroke="#4A3E2E" stroke-width="4" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" style="--d:1.2s" d="M60 330 C 200 322 360 246 480 214 S 650 178 690 170 S 820 110 900 76" fill="none" stroke="#B22A1E" stroke-width="5" stroke-linecap="round"/>
+        <circle class="ring" cx="690" cy="170" r="16" fill="none" stroke="#B22A1E" stroke-width="2"/>
+        <circle class="pop" style="--d:2.6s" cx="690" cy="170" r="16" fill="#B22A1E" stroke="#DCCDB8" stroke-width="4"/>
+        <g class="fade" style="--d:2.8s">
+          <line x1="676" y1="158" x2="560" y2="92" stroke="#B22A1E" stroke-width="1.5"/>
+          <text x="552" y="76" text-anchor="end" font-family="Lora,Georgia,serif" font-style="italic" font-weight="700" font-size="20" fill="#B22A1E">Los tres se encuentran en la obra</text>
+        </g>
+        <text x="920" y="18" text-anchor="end" font-family="Poppins,Arial,sans-serif" font-size="10" letter-spacing="1.6" fill="#6E5F47">ARCOS NARRATIVOS · ILUSTRATIVO</text>
+      </svg>
+      <div class="legend">
+        <div class="up" style="--d:.3s"><svg viewBox="0 0 44 14"><line x1="2" y1="7" x2="42" y2="7" stroke="#B22A1E" stroke-width="5" stroke-linecap="round"/></svg><div><h4>Los estudiantes</h4><p>Jóvenes arquitectos vascos ante su primera obra real: del aula al territorio.</p></div></div>
+        <div class="up" style="--d:.45s"><svg viewBox="0 0 44 14"><line x1="2" y1="7" x2="42" y2="7" stroke="#4A3E2E" stroke-width="4" stroke-linecap="round"/></svg><div><h4>Los oficios</h4><p>Constructoras y maestros de obra que trabajan con los estudiantes en la propia obra.</p></div></div>
+        <div class="up" style="--d:.6s"><svg viewBox="0 0 44 14"><line x1="2" y1="7" x2="42" y2="7" stroke="#6E5F47" stroke-width="3" stroke-dasharray="7 5" stroke-linecap="round"/></svg><div><h4>El territorio</h4><p>Pueblos, vecinos y alcaldes como personaje colectivo. En la apertura se les suman los primeros viajeros.</p></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 12 · FORMATO ============ -->
+<div class="frame" tabindex="-1"><section class="slide dark" aria-label="Formato">
+  <div class="in">
+    <p class="eyebrow up">Formato</p>
+    <h2 class="h2 up" style="--d:.1s">Cine documental de autor, en euskera, con vocación de salir</h2>
+    <p class="lead up" style="--d:.2s;font-size:20px">Un largometraje y, si EITB lo quiere para parrilla y Primeran, una serie montada con el mismo material.</p>
+    <svg class="fmt" viewBox="0 0 1392 300" role="img" aria-label="Largometraje de 80 a 95 minutos y serie de 3 o 4 capítulos de 45 minutos, a la misma escala">
+      <g font-family="Poppins,Arial,sans-serif">
+        <text x="0" y="22" font-size="13" font-weight="700" letter-spacing="2" fill="#EFE3CB">LARGOMETRAJE · 80 – 95 MIN</text>
+        <rect class="grow" style="--d:.4s" x="0" y="38" width="533" height="46" rx="4" fill="#D65A48"/>
+        <rect class="grow" style="--d:1.2s" x="533" y="38" width="100" height="46" rx="4" fill="url(#hatch)" stroke="#D65A48" stroke-width="1.5"/>
+        <g font-size="11" fill="#BFAE93" letter-spacing="1" class="fade" style="--d:1.4s">
+          <line x1="1" y1="92" x2="1" y2="100" stroke="#BFAE93"/><text x="0" y="116">00:00</text>
+          <line x1="200" y1="92" x2="200" y2="100" stroke="#BFAE93"/><text x="200" y="116" text-anchor="middle">00:30</text>
+          <line x1="400" y1="92" x2="400" y2="100" stroke="#BFAE93"/><text x="400" y="116" text-anchor="middle">01:00</text>
+          <line x1="600" y1="92" x2="600" y2="100" stroke="#BFAE93"/><text x="600" y="116" text-anchor="middle">01:30</text>
+        </g>
+        <text x="0" y="176" font-size="13" font-weight="700" letter-spacing="2" fill="#EFE3CB">SERIE · 3 O 4 CAPÍTULOS DE 45 MIN</text>
+        <rect class="grow" style="--d:.7s" x="0" y="192" width="300" height="46" rx="4" fill="#EFE3CB"/>
+        <rect class="grow" style="--d:.9s" x="316" y="192" width="300" height="46" rx="4" fill="#EFE3CB"/>
+        <rect class="grow" style="--d:1.1s" x="632" y="192" width="300" height="46" rx="4" fill="#EFE3CB"/>
+        <rect class="grow" style="--d:1.3s" x="948" y="192" width="300" height="46" rx="4" fill="none" stroke="#EFE3CB" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <g font-size="12" font-weight="700" letter-spacing="2" class="fade" style="--d:1.6s">
+          <text x="20" y="220" fill="#231D16">CAP. 1</text><text x="336" y="220" fill="#231D16">CAP. 2</text><text x="652" y="220" fill="#231D16">CAP. 3</text><text x="968" y="220" fill="#EFE3CB">CAP. 4 · OPCIONAL</text>
+        </g>
+        <text x="0" y="284" font-family="Lora,Georgia,serif" font-style="italic" font-size="16" fill="#BFAE93" class="fade" style="--d:1.8s">Misma escala de tiempo en las dos filas: mismo material, dos montajes.</text>
+      </g>
+    </svg>
+    <div class="langs up" style="--d:1.6s">
+      <span class="lang"><b>EU</b>Versión original en euskera</span>
+      <span class="lang sub"><b>ES</b>Subtítulos profesionales</span>
+      <span class="lang sub"><b>EN</b>Subtítulos profesionales</span>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 13 · VENTANAS ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Ventanas de distribución">
+  <div class="in">
+    <div class="two">
+      <div>
+        <p class="eyebrow up">Ventanas</p>
+        <h2 class="h2 up" style="--d:.1s">Primero en casa, después al mundo</h2>
+        <ul class="wins">
+          <li class="up" style="--d:.3s"><span class="n">0</span><div><h4>EITB y Primeran</h4><p>Estreno y presencia permanente en catálogo: la base de todo lo demás.</p></div></li>
+          <li class="up" style="--d:.5s"><span class="n">1</span><div><h4>Festivales de cine</h4><p>Zinemaldia, ZINEBI, IDFA y el circuito de documental.</p></div></li>
+          <li class="up" style="--d:.7s"><span class="n">2</span><div><h4>Medios de arquitectura</h4><p>ArchDaily, Dezeen, Domus: el proceso como caso de estudio.</p></div></li>
+          <li class="up" style="--d:.9s"><span class="n">3</span><div><h4>Plataformas educativas</h4><p>Circuito universitario y escuelas de arquitectura.</p></div></li>
+          <li class="up" style="--d:1.1s"><span class="n">4</span><div><h4>Turismo sostenible e instituciones</h4><p>Medios de turismo consciente y canales del Gobierno Vasco y la EHU.</p></div></li>
+        </ul>
+      </div>
+      <div class="gfx">
+        <svg class="rings" viewBox="0 0 700 700" role="img" aria-label="Ventanas de distribución en anillos concéntricos, con EITB en el centro">
+          <circle class="ripple" cx="350" cy="350" r="80" fill="none" stroke="#B22A1E" stroke-width="2"/>
+          <circle class="pop" style="--d:1.3s" cx="350" cy="350" r="320" fill="none" stroke="#4A3E2E" stroke-opacity=".25" stroke-width="1.5"/>
+          <circle class="pop" style="--d:1s" cx="350" cy="350" r="255" fill="none" stroke="#4A3E2E" stroke-opacity=".35" stroke-width="1.5"/>
+          <circle class="pop" style="--d:.7s" cx="350" cy="350" r="190" fill="none" stroke="#4A3E2E" stroke-opacity=".5" stroke-width="1.5"/>
+          <circle class="pop" style="--d:.4s" cx="350" cy="350" r="125" fill="none" stroke="#B22A1E" stroke-width="2"/>
+          <circle class="pop" style="--d:.1s" cx="350" cy="350" r="80" fill="#B22A1E"/>
+          <g class="pop" style="--d:.3s" text-anchor="middle">
+            <text x="350" y="342" font-family="Lora,Georgia,serif" font-weight="700" font-size="24" fill="#EFE3CB">EITB</text>
+            <text x="350" y="368" font-family="Poppins,Arial,sans-serif" font-size="12" letter-spacing="1.5" fill="#EFE3CB">+ PRIMERAN</text>
+          </g>
+          <g font-family="Lora,Georgia,serif" font-weight="700" font-size="22" fill="#B22A1E" text-anchor="middle">
+            <text class="pop" style="--d:.5s" x="350" y="240">1</text>
+            <text class="pop" style="--d:.8s" x="350" y="176">2</text>
+            <text class="pop" style="--d:1.1s" x="350" y="111">3</text>
+            <text class="pop" style="--d:1.4s" x="350" y="46">4</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 14 · POR QUÉ EITB ============ -->
+<div class="frame" tabindex="-1"><section class="slide crema" aria-label="Por qué EITB">
+  <div class="in">
+    <p class="eyebrow up">Por qué EITB</p>
+    <h2 class="h2 up" style="--d:.1s">Del aula al territorio: una historia vasca que merece ser contada</h2>
+    <div class="why">
+      <div class="up" style="--d:.3s">
+        <svg viewBox="0 0 150 150" aria-hidden="true">
+          <circle class="draw" pathLength="1" style="--d:.5s" cx="75" cy="75" r="68" fill="none" stroke="#B22A1E" stroke-width="3"/>
+          <text class="pop" style="--d:1.1s" x="75" y="93" text-anchor="middle" font-family="Lora,Georgia,serif" font-weight="700" font-size="52" fill="#B22A1E">EU</text>
+        </svg>
+        <h3>En euskera</h3>
+        <p>Rodaje y versión original en euskera, con subtitulado profesional para que el idioma sea un activo y no un límite.</p>
+      </div>
+      <div class="up" style="--d:.45s">
+        <svg viewBox="0 0 150 150" aria-hidden="true">
+          <g fill="#4A3E2E">
+            <g class="pop" style="--d:.7s"><circle cx="30" cy="74" r="11"/><path d="M13 128 V104 a17 17 0 0 1 34 0 V128 Z"/></g>
+            <g class="pop" style="--d:.85s" fill="#B22A1E"><circle cx="75" cy="52" r="13"/><path d="M55 128 V88 a20 20 0 0 1 40 0 V128 Z"/></g>
+            <g class="pop" style="--d:1s"><circle cx="120" cy="74" r="11"/><path d="M103 128 V104 a17 17 0 0 1 34 0 V128 Z"/></g>
+          </g>
+          <line class="draw" pathLength="1" style="--d:1.2s" x1="4" y1="138" x2="146" y2="138" stroke="#4A3E2E" stroke-width="2"/>
+        </svg>
+        <h3>Talento vasco</h3>
+        <p>Una nueva generación de arquitectos como protagonistas, con un equipo vasco que se concretará con EITB.</p>
+      </div>
+      <div class="up" style="--d:.6s">
+        <svg viewBox="0 0 150 150" aria-hidden="true">
+          <circle cx="75" cy="75" r="64" fill="none" stroke="#4A3E2E" stroke-width="2.5"/>
+          <ellipse cx="75" cy="75" rx="30" ry="64" fill="none" stroke="#4A3E2E" stroke-width="1.5">
+            <animate attributeName="rx" values="64;4;64" dur="6s" repeatCount="indefinite"/>
+          </ellipse>
+          <ellipse cx="75" cy="75" rx="4" ry="64" fill="none" stroke="#B22A1E" stroke-width="2">
+            <animate attributeName="rx" values="4;64;4" dur="6s" repeatCount="indefinite"/>
+          </ellipse>
+          <line x1="11" y1="75" x2="139" y2="75" stroke="#4A3E2E" stroke-width="1.5"/>
+          <path d="M22 44 H128 M22 106 H128" stroke="#4A3E2E" stroke-width="1.2" fill="none"/>
+        </svg>
+        <h3>Proyección internacional</h3>
+        <p>Un tema de interés global (turismo, patrimonio, educación) y una ruta de festivales y plataformas desde el primer día.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 15 · TRES PASOS ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="Qué proponemos hoy">
+  <div class="in">
+    <p class="eyebrow up">Qué proponemos hoy</p>
+    <h2 class="h2 up" style="--d:.1s">Tres pasos para empezar</h2>
+    <div class="steps">
+      <svg viewBox="0 0 1392 20" preserveAspectRatio="none" aria-hidden="true"><line class="draw" pathLength="1" style="--d:.4s" x1="48" y1="10" x2="1018" y2="10" stroke="#B22A1E" stroke-width="2"/></svg>
+      <div class="step up" style="--d:.3s"><div class="n pop" style="--d:.5s">1</div><h3>Conocernos</h3><p>Presentar el proyecto y escuchar cómo lo ve EITB: formato, calendario y encaje en su programación.</p></div>
+      <div class="step up" style="--d:.5s"><div class="n pop" style="--d:.9s">2</div><h3>La producción</h3><p>Definir con EITB cómo se produce el documental y con qué equipo.</p></div>
+      <div class="step up" style="--d:.7s"><div class="n pop" style="--d:1.3s">3</div><h3>Acceso a los hitos</h3><p>Cubrir los momentos de este curso: el lanzamiento del concurso, el fallo y la presentación pública.</p></div>
+    </div>
+  </div>
+  <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
+</section></div>
+
+<!-- ============ 16 · CIERRE ============ -->
+<div class="frame" tabindex="-1"><section class="slide dark" aria-label="Cierre">
+  <div class="close-c">
+    <svg viewBox="188 355 648 210" width="180" height="58" role="img" aria-label="HIRU">
+      <mask id="mkClose" maskUnits="userSpaceOnUse" x="180" y="345" width="664" height="230">
+        <use href="#hiruLine" class="draw ln" pathLength="1" style="--d:.2s" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+      </mask>
+      <g mask="url(#mkClose)" style="--logo-a:#EFE3CB;--logo-b:#D65A48"><use href="#hiru" x="188" y="355" width="648" height="210"/></g>
+    </svg>
+    <h2 class="words" style="--w0:2.2s">Eskerrik asko</h2>
+    <div class="contact up" style="--d:2.6s">
+      <div><span>Web</span><a href="https://www.hiru.info" target="_blank" rel="noopener">www.hiru.info</a></div>
+      <div><span>Contacto</span><b>kontaktua@hiru.info</b></div>
+      <div><span>Fundador · Manex Otegi</span><b>manexotegui@gmail.com</b></div>
+    </div>
+  </div>
+</section></div>
+
+</div>
+<div class="progress" aria-hidden="true"><i id="prog"></i></div>
+</main>
+
+<nav class="bar" aria-label="Controles de la presentación">
+  <button type="button" id="prev" aria-label="Diapositiva anterior">← Anterior</button>
+  <span class="count" id="count" aria-live="polite">01 / 17</span>
+  <button type="button" id="next" aria-label="Diapositiva siguiente">Siguiente →</button>
+  <button type="button" id="ovBtn" aria-pressed="false">Ver todas</button>
+</nav>
+</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), deck=document.getElementById('deck');
+  var frames=[].slice.call(deck.querySelectorAll('.frame'));
+  var N=frames.length, cur=0, ov=false, t0=performance.now();
+  var pad=function(n){return (n<10?'0':'')+n};
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  frames.forEach(function(f,i){var s=f.querySelector('.sn'); if(s) s.textContent=pad(i+1)+' / '+pad(N);});
+
+  [].forEach.call(document.querySelectorAll('.words'),function(el){
+    var i=0, walk=function(node){
+      [].slice.call(node.childNodes).forEach(function(c){
+        if(c.nodeType===3){
+          var frag=document.createDocumentFragment();
+          c.textContent.split(/(\s+)/).forEach(function(p){
+            if(!p) return;
+            if(/^\s+$/.test(p)){frag.appendChild(document.createTextNode(p));return;}
+            var sp=document.createElement('span'); sp.className='w'; sp.style.setProperty('--i',i++); sp.textContent=p; frag.appendChild(sp);
+          });
+          node.replaceChild(frag,c);
+        } else if(c.nodeType===1){ walk(c); }
+      });
+    }; walk(el);
+  });
+
+  function fit(){
+    if(ov){ frames.forEach(function(f){ f.firstElementChild.style.setProperty('--s', f.clientWidth/1600); }); return; }
+    var s=Math.min(stage.clientWidth/1600, stage.clientHeight/900);
+    document.documentElement.style.setProperty('--s', s);
+  }
+
+  function counters(slide){
+    [].forEach.call(slide.querySelectorAll('[data-count]'),function(el){
+      var target=parseFloat(el.getAttribute('data-count')), start=null;
+      if(reduce){el.textContent=target;return;}
+      var step=function(ts){ if(!start) start=ts+700; var k=Math.min(1,Math.max(0,(ts-start)/1500)); var e=1-Math.pow(1-k,3);
+        el.textContent = k<1 ? (target*e).toFixed(1).replace('.',',') : String(target); if(k<1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+  }
+
+  function play(i){
+    var sl=frames[i].firstElementChild;
+    sl.classList.remove('play'); void sl.offsetWidth; sl.classList.add('play');
+    counters(sl); t0=performance.now();
+    var v=sl.querySelector('video'); if(v){ try{ v.currentTime=0; var p=v.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+  }
+
+  function go(i,force){
+    i=Math.max(0,Math.min(N-1,i));
+    if(i===cur && !force) return;
+    frames[cur].classList.remove('is-current'); frames[cur].firstElementChild.classList.remove('play');
+    cur=i; frames[cur].classList.add('is-current');
+    play(cur);
+    document.getElementById('count').textContent=pad(cur+1)+' / '+pad(N);
+    document.getElementById('prog').style.width=((cur+1)/N*100)+'%';
+    try{ history.replaceState(null,'','#s'+(cur+1)); }catch(e){}
+  }
+
+  function setOv(on){
+    ov=on; stage.classList.toggle('ov',on); deck.classList.toggle('ov',on);
+    var b=document.getElementById('ovBtn'); b.setAttribute('aria-pressed',on?'true':'false'); b.textContent=on?'Volver a la presentación':'Ver todas';
+    if(!on){ frames.forEach(function(f){ f.firstElementChild.style.removeProperty('--s'); }); }
+    frames.forEach(function(f){ f.setAttribute('tabindex', on?'0':'-1'); if(on) f.firstElementChild.classList.remove('play'); });
+    fit();
+    if(!on){ play(cur); } else { var c=frames[cur]; c.scrollIntoView&&c.scrollIntoView({block:'center'}); }
+  }
+
+  document.getElementById('prev').onclick=function(){go(cur-1)};
+  document.getElementById('next').onclick=function(){go(cur+1)};
+  document.getElementById('ovBtn').onclick=function(){setOv(!ov)};
+  frames.forEach(function(f,i){
+    f.addEventListener('click',function(){ if(ov){ setOv(false); go(i,true); } });
+    f.addEventListener('keydown',function(e){ if(ov && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); setOv(false); go(i,true);} });
+  });
+  var swiped=false;
+  stage.addEventListener('click',function(e){
+    if(swiped){ swiped=false; return; }
+    if(ov || e.target.closest('a,button')) return;
+    var r=stage.getBoundingClientRect(); (e.clientX-r.left < r.width*0.33) ? go(cur-1) : go(cur+1);
+  });
+  document.addEventListener('keydown',function(e){
+    if(ov){ if(e.key==='Escape'||e.key==='g') setOv(false); return; }
+    if(['ArrowRight','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();go(cur+1);}
+    else if(['ArrowLeft','PageUp'].indexOf(e.key)>-1){e.preventDefault();go(cur-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(N-1);}
+    else if(e.key==='g'){setOv(true);}
+  });
+  var sx=null;
+  stage.addEventListener('pointerdown',function(e){sx=e.clientX},{passive:true});
+  stage.addEventListener('pointerup',function(e){ if(sx===null||ov) return; var dx=e.clientX-sx; sx=null; if(Math.abs(dx)>60){ swiped=true; dx<0?go(cur+1):go(cur-1); }},{passive:true});
+  window.addEventListener('resize',fit);
+
+  setInterval(function(){
+    var tc=frames[cur].querySelector('.tc'); if(!tc) return;
+    var ms=performance.now()-t0, f=Math.floor(ms/40)%25, s=Math.floor(ms/1000);
+    tc.textContent='00:'+pad(Math.floor(s/60)%60)+':'+pad(s%60)+':'+pad(f);
+  },40);
+
+  if(reduce){ [].forEach.call(document.querySelectorAll('svg'),function(s){ if(s.pauseAnimations) try{s.pauseAnimations()}catch(e){} }); }
+
+  var m=/^#s(\d+)$/.exec(location.hash||''); var start=m?parseInt(m[1],10)-1:0;
+  fit(); frames[0].classList.add('is-current'); cur=0; go(start,true);
+})();
+</script>
+</body>
+</html>
