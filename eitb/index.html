@@ -39,6 +39,10 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 .bar button:hover{border-color:var(--crema)}
 .bar button:focus-visible,.frame:focus-visible{outline:2px solid var(--rojo-luz);outline-offset:3px}
 .bar .count{min-width:84px;text-align:center;font-variant-numeric:tabular-nums;color:var(--crema)}
+.bar .langsw{display:inline-flex;align-items:center;gap:6px;margin-left:8px;color:var(--arena)}
+.bar .langsw button{border:none;padding:10px 6px;color:var(--rojo-luz);opacity:.5}
+.bar .langsw button:hover{opacity:.85}
+.bar .langsw button[aria-pressed="true"]{opacity:1}
 .progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(239,227,203,.08)}
 .progress i{display:block;height:100%;width:0;background:var(--rojo-luz);transition:width .5s ease}
 
@@ -170,7 +174,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 .play .win{animation:off 1s ease both;animation-delay:var(--d,1s)}
 
 /* ---------- LA IDEA ---------- */
-.venn{width:100%;max-width:600px;height:auto;display:block}
+.venn{width:100%;max-width:600px;height:auto;display:block;overflow:visible}
 .play .vA{animation:vinA 1.2s cubic-bezier(.2,.7,.1,1) .2s both}
 .play .vB{animation:vinB 1.2s cubic-bezier(.2,.7,.1,1) .35s both}
 .play .vC{animation:vinC 1.2s cubic-bezier(.2,.7,.1,1) .5s both}
@@ -931,6 +935,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
   <span class="count" id="count" aria-live="polite">01 / 18</span>
   <button type="button" id="next" aria-label="Diapositiva siguiente">Siguiente →</button>
   <button type="button" id="ovBtn" aria-pressed="false">Ver todas</button>
+  <span class="langsw" role="group" aria-label="Idioma / Hizkuntza"><button type="button" data-lang="eu" aria-pressed="false">EUS</button><span aria-hidden="true">/</span><button type="button" data-lang="es" aria-pressed="true">ES</button></span>
 </nav>
 </div>
 
@@ -966,7 +971,212 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
     });
   });
 
-  [].forEach.call(document.querySelectorAll('.words'),function(el){
+  // ---------- IDIOMA (castellano / euskera) ----------
+  // Cada texto se identifica por su HTML en castellano; EU guarda su versión en euskera.
+  // Se recogen antes de partir los titulares en palabras (.words).
+  var EU={
+    "Un documental sobre una generación de arquitectos vascos que recupera el patrimonio en desuso y lo abre a viajeros que conectan con el territorio y con su gente.":"Euskal arkitektoen belaunaldi bati buruzko dokumentala: erabilerarik gabeko ondarea berreskuratu, eta lurraldearekin eta bertako jendearekin konektatzen duten bidaiariei irekitzen die.",
+    "<b>Propuesta de producción para EITB</b>":"<b>EITBrentzako ekoizpen-proposamena</b>",
+    "Del aula al territorio":"Ikasgelatik lurraldera",
+    "Sonido":"Soinua",
+    "La historia":"Istorioa",
+    "El talento que forma Euskadi, <em>construyendo</em> Euskadi.":"Euskadik trebatzen duen talentua, Euskadi <em>eraikitzen</em>.",
+    "HIRU es el sistema que retiene ese talento: estudiantes de Arquitectura de la EHU recuperan patrimonio en desuso y lo convierten en alojamientos donde quien viaja no consume el territorio: lo habita, conoce a su gente y se lleva su historia. Este documental cuenta todo el recorrido, del aula al territorio, desde el primer día.":"HIRU talentu hori atxikitzen duen sistema da: EHUko Arkitektura ikasleek erabilerarik gabeko ondarea berreskuratu eta ostatu bihurtzen dute. Bertan, bidaiariak ez du lurraldea kontsumitzen: bizi egiten du, bertako jendea ezagutzen du eta haren istorioa eramaten du berarekin. Dokumental honek ibilbide osoa kontatzen du, ikasgelatik lurraldera, lehen egunetik.",
+    "Por qué ahora":"Zergatik orain",
+    "Tres tensiones que hoy avanzan por separado en Euskadi":"Gaur egun Euskadin bakoitza bere aldetik doazen hiru tentsio",
+    "01 · Turismo":"01 · Turismoa",
+    "Turismo en máximos":"Turismoa goien mailan",
+    "Casi cinco millones de visitantes al año y un crecimiento de en torno al 4-5 % anual. La afluencia crece más rápido que la capacidad del territorio para integrarla.":"Ia bost milioi bisitari urtean, eta urtero % 4-5 inguruko hazkundea. Bisitari kopurua lurraldeak hura integratzeko duen gaitasuna baino azkarrago hazten ari da.",
+    "02 · Talento":"02 · Talentua",
+    "1 DE CADA 4 TITULADOS":"4 TITULUDUNETATIK 1",
+    "Fuga de talento":"Talentuaren ihesa",
+    "Uno de cada cuatro titulados acaba desarrollando su carrera fuera. Euskadi forma el talento con recursos públicos y lo capitaliza otro lugar.":"Lau tituludunetatik batek kanpoan garatzen du bere ibilbidea. Euskadik baliabide publikoekin trebatzen du talentua, eta beste leku batek kapitalizatzen du.",
+    "03 · Patrimonio":"03 · Ondarea",
+    "Patrimonio en desuso":"Erabilerarik gabeko ondarea",
+    "Edificios con valor histórico y cultural siguen cerrados en los tres territorios históricos, sin uso ni proyecto de futuro.":"Balio historiko eta kulturala duten eraikinak itxita daude oraindik hiru lurralde historikoetan, erabilerarik eta etorkizuneko proiekturik gabe.",
+    "La idea":"Ideia",
+    "Donde había tres tensiones, HIRU propone un sistema":"Hiru tentsio zeuden lekuan, sistema bat proposatzen du HIRUk",
+    "HIRU se sitúa en la intersección entre <strong>educación universitaria, turismo sostenible y patrimonio en desuso</strong>.":"HIRU <strong>unibertsitate-hezkuntzaren, turismo iraunkorraren eta erabilerarik gabeko ondarearen</strong> arteko elkargunean kokatzen da.",
+    "Tres alojamientos singulares, uno en cada territorio histórico, diseñados y construidos por estudiantes de Arquitectura de la EHU. Cuando abren, los habitan viajeros que buscan el País Vasco real, lejos del turismo de masas y cerca de los vecinos. El documental lo cuenta desde dentro.":"Hiru ostatu berezi, lurralde historiko bakoitzean bana, EHUko Arkitektura ikasleek diseinatu eta eraikiak. Irekitzen direnean, benetako Euskal Herria bilatzen duten bidaiariak bizi dira bertan, masa-turismotik urrun eta bizilagunengandik gertu. Dokumentalak barrutik kontatzen du.",
+    "Educación":"Hezkuntza",
+    "Turismo":"Turismoa",
+    "Patrimonio":"Ondarea",
+    "ETSA · UPV/EHU":"AGET · UPV/EHU",
+    "SOSTENIBLE":"IRAUNKORRA",
+    "EN DESUSO → VIVO":"ERABILI GABE → BIZIRIK",
+    "El sistema":"Sistema",
+    "Cuatro fases, con cámara desde la primera":"Lau fase, kamera lehenengotik",
+    "Fase 01":"01 fasea","Fase 02":"02 fasea","Fase 03":"03 fasea","Fase 04":"04 fasea",
+    "Activar el territorio":"Lurraldea aktibatu",
+    "Identificar, junto a las instituciones, patrimonio en desuso en cada territorio histórico.":"Erakundeekin batera, erabilerarik gabeko ondarea identifikatu lurralde historiko bakoitzean.",
+    "<b>En cámara</b>Alcaldes, vecinos y edificios cerrados.":"<b>Kameran</b>Alkateak, bizilagunak eta itxitako eraikinak.",
+    "Inspirar el talento":"Talentua inspiratu",
+    "Estudiantes de la ETSA proyectan dentro del Máster Habilitante, con concurso y premio.":"AGETeko ikasleek Master Gaitzailearen barruan proiektatzen dute, lehiaketa eta sariarekin.",
+    "<b>En cámara</b>El aula, las correcciones y el fallo.":"<b>Kameran</b>Ikasgela, zuzenketak eta epaia.",
+    "Construir con sentido":"Zentzuz eraiki",
+    "El proyecto ganador se construye con criterios de sostenibilidad y sus autores son protagonistas de la obra.":"Proiektu irabazlea jasangarritasun-irizpideekin eraikitzen da, eta egileak dira obraren protagonistak.",
+    "<b>En cámara</b>Estudiantes y oficios vascos en obra.":"<b>Kameran</b>Ikasleak eta euskal ofizioak obran.",
+    "Habitar y compartir":"Bizi eta partekatu",
+    "Los alojamientos abren a viajeros que conviven con el pueblo, y su retorno se queda en el territorio.":"Ostatuak herriarekin bizi diren bidaiariei irekitzen zaizkie, eta haien itzulera lurraldean geratzen da.",
+    "<b>En cámara</b>Los primeros huéspedes y la respuesta del pueblo.":"<b>Kameran</b>Lehen ostatu-hartzaileak eta herriaren erantzuna.",
+    "El circuito":"Zirkuitua",
+    "Un sistema que se retroalimenta":"Bere burua elikatzen duen sistema",
+    "La universidad forma.":"Unibertsitateak trebatzen du.",
+    "Los estudiantes proyectan.":"Ikasleek proiektatzen dute.",
+    "El patrimonio se revitaliza.":"Ondarea biziberritu egiten da.",
+    "El alojamiento abre, creando un turismo consciente y sostenible.":"Ostatua irekitzen da, turismo kontziente eta iraunkorra sortuz.",
+    "El retorno vuelve al territorio y a sus habitantes.":"Itzulera lurraldera eta bertako biztanleengana itzultzen da.",
+    "El documental amplifica.":"Dokumentalak indartzen du.",
+    "AULA":"IKASGELA",
+    "ETSA · EHU":"AGET · EHU",
+    "TERRITORIO":"LURRALDEA",
+    "patrimonio":"ondarea",
+    "TURISMO":"TURISMOA",
+    "consciente y sostenible":"iraunkorra",
+    "CIUDADANÍA":"HERRITARRAK",
+    "orgullo común":"harrotasun komuna",
+    "Quién lo habita":"Nork bizi du",
+    "Al final, alguien abre la puerta: viajeros que conectan con el territorio y con su gente":"Azkenean, norbaitek atea irekitzen du: lurraldearekin eta bertako jendearekin konektatzen duten bidaiariak",
+    "<b>Turismo con propósito</b>Pocos huéspedes, en zonas que hoy no reciben visitantes, lejos de la masificación.":"<b>Helburudun turismoa</b>Ostatu-hartzaile gutxi, gaur egun bisitaririk jasotzen ez duten eremuetan, masifikaziotik urrun.",
+    "<b>Una experiencia auténtica</b>Dormir en un edificio con historia y conocer el pueblo, su cocina y su gente desde dentro.":"<b>Benetako esperientzia</b>Historia duen eraikin batean lo egin, eta herria, bere sukaldaritza eta bere jendea barrutik ezagutu.",
+    "<b>Turismo y ciudadanía, de la mano</b>El retorno se queda en la economía local y los vecinos recuperan un edificio que vuelve a ser suyo.":"<b>Turismoa eta herritarrak, eskutik helduta</b>Itzulera tokiko ekonomian geratzen da, eta bizilagunek berriro beraiena den eraikin bat berreskuratzen dute.",
+    "<b>Llegan conociendo la historia</b>Quien reserva ya ha visto cómo se hizo: el documental es la puerta de entrada del viajero.":"<b>Istorioa ezagututa iristen dira</b>Erreserba egiten duenak ikusi du dagoeneko nola egin zen: dokumentala da bidaiariaren sarrera-atea.",
+    "VIAJEROS":"BIDAIARIAK",
+    "VECINOS":"BIZILAGUNAK",
+    "Qué gana cada uno":"Zer irabazten du bakoitzak",
+    "Una sola operación, un retorno propio para cada parte":"Eragiketa bakarra, itzulera propioa alde bakoitzarentzat",
+    "Estudiantes":"Ikasleak",
+    "Máster Habilitante":"Master Gaitzailea",
+    "Su primer encargo profesional remunerado.":"Ordaindutako lehen enkargu profesionala.",
+    "Proyección internacional de su trabajo.":"Beren lanaren nazioarteko proiekzioa.",
+    "EHU · ETSA":"EHU · AGET",
+    "Universidad":"Unibertsitatea",
+    "Una escuela donde los estudiantes construyen lo que proyectan.":"Ikasleek proiektatzen dutena eraikitzen duten eskola.",
+    "Retiene y atrae talento joven.":"Talentu gaztea atxiki eta erakartzen du.",
+    "Gobierno Vasco":"Eusko Jaurlaritza",
+    "Turismo sostenible en zonas nuevas, sin saturar.":"Turismo iraunkorra eremu berrietan, saturatu gabe.",
+    "Una iniciativa pionera que genera orgullo.":"Harrotasuna sortzen duen ekimen aitzindaria.",
+    "Territorio":"Lurraldea",
+    "Municipios y vecinos":"Udalak eta auzokoak",
+    "Patrimonio recuperado sin coste de restauración.":"Ondare berreskuratua, zaharberritze-kosturik gabe.",
+    "Economía local y orgullo compartido.":"Tokiko ekonomia eta harrotasun partekatua.",
+    "Viajeros":"Bidaiariak",
+    "Turismo consciente":"Turismo kontzientea",
+    "Dormir en un edificio con historia y conocer el pueblo desde dentro.":"Historia duen eraikin batean lo egin eta herria barrutik ezagutu.",
+    "Llegan conociendo la historia: el documental es su puerta de entrada.":"Istorioa ezagututa iristen dira: dokumentala da haien sarrera-atea.",
+    "Producción":"Ekoizpena",
+    "Del aula al territorio: una historia vasca que merece ser contada.":"Ikasgelatik lurraldera: kontatzea merezi duen euskal istorioa.",
+    "Un arco real de tres años, en euskera, para antena, Primeran y festivales.":"Hiru urteko benetako arkua, euskaraz, antenarako, Primeranerako eta jaialdietarako.",
+    "Quién respalda":"Nork babesten du",
+    "Una alianza institucional a tres bandas":"Hiru aldeko erakunde-aliantza",
+    "UPV/EHU · ETSA":"UPV/EHU · AGET",
+    "Marco académico: el concurso se integra en el Máster Habilitante en Arquitectura.":"Esparru akademikoa: lehiaketa Arkitekturako Master Gaitzailean txertatzen da.",
+    "Impulsa y coordina el sistema: emplazamientos, concurso, obra, apertura y documental.":"Sistema bultzatu eta koordinatzen du: kokapenak, lehiaketa, obra, irekiera eta dokumentala.",
+    "Departamento de Turismo":"Turismo Saila",
+    "Respaldo institucional desde la Viceconsejería de Turismo y premio para el proyecto ganador.":"Turismo Sailburuordetzaren erakunde-babesa eta saria proiektu irabazlearentzat.",
+    "Con el <strong>Ayuntamiento de Erandio</strong>, que ofrece el antiguo albergue de Akarlanda para el primer alojamiento.":"<strong>Erandioko Udalarekin</strong>: lehen ostaturako Akarlandako aterpetxe zaharra eskaintzen du.",
+    "Primer capítulo":"Lehen kapitulua",
+    "Empezamos en Akarlanda, Erandio":"Akarlandan hasiko gara, Erandion",
+    "El Ayuntamiento de Erandio ofrece el <strong>antiguo albergue del parque de Akarlanda</strong>. Sobre él trabajan este curso 2026-27 los estudiantes del Máster Habilitante, y ahí se construirá el proyecto ganador.":"Erandioko Udalak <strong>Akarlanda parkeko aterpetxe zaharra</strong> eskaintzen du. Master Gaitzaileko ikasleak 2026-27 ikasturte honetan ari dira hura lantzen, eta bertan eraikiko da proiektu irabazlea.",
+    "Gipuzkoa y Araba vienen después, con su construcción en 2027-28. Tres territorios, tres alojamientos: un <strong>hiruki</strong>, el triángulo que da sentido a HIRU.":"Gipuzkoa eta Araba ondoren etorriko dira, 2027-28an eraikiko baitira. Hiru lurralde, hiru ostatu: <strong>hiruki</strong> bat, HIRUri zentzua ematen dion triangelua.",
+    "Bizkaia · confirmado":"Bizkaia · baieztatua",
+    "Gipuzkoa · en búsqueda":"Gipuzkoa · bilatzen",
+    "Araba · en búsqueda":"Araba · bilatzen",
+    "edificio por encontrar":"eraikina aurkitzeko",
+    "Qué se rueda y cuándo":"Zer filmatzen den eta noiz",
+    "Un rodaje longitudinal que sigue el proceso real":"Benetako prozesuari jarraitzen dion filmaketa luzetarakoa",
+    "Calendario orientativo, sincronizado con los hitos del proyecto.":"Egutegi orientagarria, proiektuaren mugarriekin sinkronizatua.",
+    "SEP 2026":"IRA 2026",
+    "La búsqueda":"Bilaketa",
+    "El curso":"Ikasturtea",
+    "El fallo":"Epaia",
+    "La obra":"Obra",
+    "Rodaje":"Filmaketa",
+    "Postproducción":"Postprodukzioa",
+    "Estreno":"Estreinaldia",
+    "sep – dic 2026 · patrimonio, alcaldes y vecinos":"ira – abe 2026 · ondarea, alkateak eta bizilagunak",
+    "nov 2026 – abr 2027 · estudiantes proyectando":"aza 2026 – api 2027 · ikasleak proiektatzen",
+    "2027 · fecha por confirmar con la ETSA":"2027 · data AGETekin zehazteko",
+    "inicio por definir":"hasiera zehazteko",
+    "86 – 105 días · 6 bloques":"86 – 105 egun · 6 bloke",
+    "ene – may 2029":"urt – mai 2029",
+    "junio 2029 · previsto":"2029ko ekaina · aurreikusia",
+    "HOY":"GAUR",
+    "Quién protagoniza":"Nor da protagonista",
+    "Una generación, un oficio y un territorio":"Belaunaldi bat, ofizio bat eta lurralde bat",
+    "LA BÚSQUEDA":"BILAKETA",
+    "EL CURSO":"IKASTURTEA",
+    "EL FALLO":"EPAIA",
+    "LA OBRA":"OBRA",
+    "LA APERTURA":"IREKIERA",
+    "Los tres se encuentran en la obra":"Hirurak obran elkartzen dira",
+    "ARCOS NARRATIVOS · ILUSTRATIVO":"ARKU NARRATIBOAK · ADIBIDEA",
+    "Los estudiantes":"Ikasleak",
+    "Jóvenes arquitectos vascos ante su primera obra real: del aula al territorio.":"Euskal arkitekto gazteak beren lehen benetako obraren aurrean: ikasgelatik lurraldera.",
+    "Los oficios":"Ofizioak",
+    "Constructoras y maestros de obra que trabajan con los estudiantes en la propia obra.":"Ikasleekin obran bertan lan egiten duten eraikuntza-enpresak eta obra-maisuak.",
+    "El territorio":"Lurraldea",
+    "Pueblos, vecinos y alcaldes como personaje colectivo. En la apertura se les suman los primeros viajeros.":"Herriak, bizilagunak eta alkateak, pertsonaia kolektibo gisa. Irekieran, lehen bidaiariak batzen zaizkie.",
+    "Formato":"Formatua",
+    "Cine documental de autor, en euskera, con vocación de salir":"Egile-zinema dokumentala, euskaraz, kanpora ateratzeko asmoz",
+    "Un largometraje y, si EITB lo quiere para parrilla y Primeran, una serie montada con el mismo material.":"Film luze bat eta, EITBk programaziorako eta Primeranerako nahi badu, material berarekin muntatutako telesail bat.",
+    "LARGOMETRAJE · 80 – 95 MIN":"FILM LUZEA · 80 – 95 MIN",
+    "SERIE · 3 O 4 CAPÍTULOS DE 45 MIN":"TELESAILA · 45 MINUTUKO 3 EDO 4 KAPITULU",
+    "CAP. 1":"1. KAP.","CAP. 2":"2. KAP.","CAP. 3":"3. KAP.",
+    "CAP. 4 · OPCIONAL":"4. KAP. · AUKERAZKOA",
+    "Misma escala de tiempo en las dos filas: mismo material, dos montajes.":"Denbora-eskala bera bi errenkadetan: material bera, bi muntaketa.",
+    "<b>EU</b>Versión original en euskera":"<b>EU</b>Jatorrizko bertsioa euskaraz",
+    "<b>ES</b>Subtítulos profesionales":"<b>ES</b>Azpititulu profesionalak",
+    "<b>EN</b>Subtítulos profesionales":"<b>EN</b>Azpititulu profesionalak",
+    "Ventanas":"Leihoak",
+    "Primero en casa, después al mundo":"Lehenik etxean, gero mundura",
+    "EITB y Primeran":"EITB eta Primeran",
+    "Estreno y presencia permanente en catálogo: la base de todo lo demás.":"Estreinaldia eta katalogoan presentzia iraunkorra: gainerako guztiaren oinarria.",
+    "Festivales de cine":"Zinema-jaialdiak",
+    "Zinemaldia, ZINEBI, IDFA y el circuito de documental.":"Zinemaldia, ZINEBI, IDFA eta dokumentalen zirkuitua.",
+    "Medios de arquitectura":"Arkitektura-hedabideak",
+    "ArchDaily, Dezeen, Domus: el proceso como caso de estudio.":"ArchDaily, Dezeen, Domus: prozesua azterketa-kasu gisa.",
+    "Plataformas educativas":"Hezkuntza-plataformak",
+    "Circuito universitario y escuelas de arquitectura.":"Unibertsitate-zirkuitua eta arkitektura-eskolak.",
+    "Turismo sostenible e instituciones":"Turismo iraunkorra eta erakundeak",
+    "Medios de turismo consciente y canales del Gobierno Vasco y la EHU.":"Turismo kontzientearen hedabideak eta Eusko Jaurlaritzaren eta EHUren kanalak.",
+    "Por qué EITB":"Zergatik EITB",
+    "Del aula al territorio: una historia vasca que merece ser contada":"Ikasgelatik lurraldera: kontatzea merezi duen euskal istorioa",
+    "En euskera":"Euskaraz",
+    "Rodaje y versión original en euskera, con subtitulado profesional para que el idioma sea un activo y no un límite.":"Filmaketa eta jatorrizko bertsioa euskaraz, azpititulatze profesionalarekin, hizkuntza muga izan beharrean balio bat izan dadin.",
+    "Talento vasco":"Euskal talentua",
+    "Una nueva generación de arquitectos como protagonistas, con un equipo vasco que se concretará con EITB.":"Arkitektoen belaunaldi berri bat protagonista gisa, EITBrekin zehaztuko den euskal talde batekin.",
+    "Proyección internacional":"Nazioarteko proiekzioa",
+    "Un tema de interés global (turismo, patrimonio, educación) y una ruta de festivales y plataformas desde el primer día.":"Interes globaleko gaia (turismoa, ondarea, hezkuntza) eta jaialdi eta plataformen ibilbidea lehen egunetik.",
+    "Qué proponemos hoy":"Zer proposatzen dugun gaur",
+    "Tres pasos para empezar":"Hasteko hiru urrats",
+    "Conocernos":"Elkar ezagutu",
+    "Presentar el proyecto y escuchar cómo lo ve EITB: formato, calendario y encaje en su programación.":"Proiektua aurkeztu eta EITBk nola ikusten duen entzun: formatua, egutegia eta programazioan nola txertatu.",
+    "La producción":"Ekoizpena",
+    "Definir con EITB cómo se produce el documental y con qué equipo.":"EITBrekin zehaztu dokumentala nola ekoitzi eta zein talderekin.",
+    "Acceso a los hitos":"Mugarrietarako sarbidea",
+    "Cubrir los momentos de este curso: el lanzamiento del concurso, el fallo y la presentación pública.":"Ikasturte honetako uneak jaso: lehiaketaren aurkezpena, epaia eta aurkezpen publikoa.",
+    "Web":"Webgunea",
+    "Contacto":"Kontaktua",
+    "Fundador · Manex Otegi":"Sortzailea · Manex Otegi",
+    "← Anterior":"← Aurrekoa",
+    "Siguiente →":"Hurrengoa →",
+    "Ver todas":"Ikusi denak"
+  };
+  var UI={es:{back:'Volver a la presentación',all:'Ver todas'},eu:{back:'Itzuli aurkezpenera',all:'Ikusi denak'}};
+  var lang='es', items=[], INLINE={STRONG:1,EM:1,B:1,I:1,BR:1,SMALL:1};
+  function leaf(el){
+    if(!el.textContent.trim()) return false;
+    for(var n=el.firstChild;n;n=n.nextSibling){ if(n.nodeType===1 && (!INLINE[n.tagName.toUpperCase()] || n.children.length)) return false; }
+    return true;
+  }
+  function collect(el){
+    if(leaf(el)){ var k=el.innerHTML.replace(/\s+/g,' ').trim(); if(EU.hasOwnProperty(k)) items.push({el:el,es:el.innerHTML,eu:EU[k]}); return; }
+    for(var c=el.firstElementChild;c;c=c.nextElementSibling) collect(c);
+  }
+  collect(deck); collect(document.querySelector('.bar'));
+
+  function splitWords(el){
     var i=0, walk=function(node){
       [].slice.call(node.childNodes).forEach(function(c){
         if(c.nodeType===3){
@@ -980,7 +1190,24 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
         } else if(c.nodeType===1){ walk(c); }
       });
     }; walk(el);
+  }
+  [].forEach.call(document.querySelectorAll('.words'),splitWords);
+
+  function setLang(l){
+    lang = l==='eu' ? 'eu' : 'es';
+    items.forEach(function(it){
+      it.el.innerHTML = lang==='eu' ? it.eu : it.es;
+      if(it.el.classList && it.el.classList.contains('words')) splitWords(it.el);
+    });
+    document.documentElement.lang = lang;
+    [].forEach.call(document.querySelectorAll('.langsw button'),function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang')===lang ? 'true' : 'false'); });
+    var ob=document.getElementById('ovBtn'); if(ob) ob.textContent = ov ? UI[lang].back : UI[lang].all;
+    try{ localStorage.setItem('hiru-eitb-lang', lang); }catch(e){}
+  }
+  [].forEach.call(document.querySelectorAll('.langsw button'),function(b){
+    b.addEventListener('click',function(){ setLang(b.getAttribute('data-lang')); });
   });
+  try{ if(localStorage.getItem('hiru-eitb-lang')==='eu') setLang('eu'); }catch(e){}
 
   function fit(){
     if(ov){ frames.forEach(function(f){ f.firstElementChild.style.setProperty('--s', f.clientWidth/1600); }); return; }
@@ -1044,7 +1271,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 
   function setOv(on){
     ov=on; stage.classList.toggle('ov',on); deck.classList.toggle('ov',on);
-    var b=document.getElementById('ovBtn'); b.setAttribute('aria-pressed',on?'true':'false'); b.textContent=on?'Volver a la presentación':'Ver todas';
+    var b=document.getElementById('ovBtn'); b.setAttribute('aria-pressed',on?'true':'false'); b.textContent=on?UI[lang].back:UI[lang].all;
     if(!on){ frames.forEach(function(f){ f.firstElementChild.style.removeProperty('--s'); }); }
     frames.forEach(function(f){ f.setAttribute('tabindex', on?'0':'-1'); if(on){ f.firstElementChild.classList.remove('play'); stopVideos(f); } });
     fit();
