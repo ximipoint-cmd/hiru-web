@@ -95,6 +95,12 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 @keyframes off{from{fill:#F6C96B}to{fill:#4A3E2E}}
 @keyframes bars{from{height:0}}
 @keyframes ripple{from{r:80;opacity:.8}to{r:330;opacity:0}}
+/* Isotipo que se dibuja (portada y cierre): sus tres trazos reales, uno tras otro y a
+   velocidad constante (pico izquierdo, lazo rojo, pico derecho). Sin máscara: una máscara
+   más ancha que el trazo deja ver un trozo del tramo siguiente en los cruces. En reposo el
+   logo está completo; el desfase solo existe dentro de la animación. */
+@keyframes logo-seg{from{stroke-dashoffset:var(--off)}to{stroke-dashoffset:0}}
+.play .logo-seg{animation:logo-seg var(--dur,1s) linear var(--del,0s) both}
 @keyframes vinA{from{transform:translate(-150px,-70px);opacity:0}}
 @keyframes vinB{from{transform:translate(150px,-70px);opacity:0}}
 @keyframes vinC{from{transform:translate(0,150px);opacity:0}}
@@ -334,10 +340,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
   <div class="rec fade" style="--d:1.2s"><i></i>REC <span class="tc">00:00:00:00</span></div>
   <div class="cover-c">
     <svg class="cover-logo" viewBox="188 355 648 210" role="img" aria-label="HIRU">
-      <mask id="mkCover" maskUnits="userSpaceOnUse" x="180" y="345" width="664" height="230">
-        <use href="#hiruLine" class="draw ln" pathLength="1" style="--d:.3s" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-      </mask>
-      <g mask="url(#mkCover)" style="--logo-a:#EFE3CB;--logo-b:#D65A48"><use href="#hiru" x="188" y="355" width="648" height="210"/></g>
+      <g class="logo-draw" data-start=".3" data-dur="2.3" style="--logo-a:#EFE3CB;--logo-b:#D65A48"></g>
     </svg>
     <div class="wordmark up" style="--d:2.6s">HIRU</div>
     <h1 class="words" style="--w0:2.7s">Ikasgelatik <em>lurraldera</em></h1>
@@ -908,10 +911,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 <div class="frame" tabindex="-1"><section class="slide dark" aria-label="Cierre">
   <div class="close-c">
     <svg viewBox="188 355 648 210" width="180" height="58" role="img" aria-label="HIRU">
-      <mask id="mkClose" maskUnits="userSpaceOnUse" x="180" y="345" width="664" height="230">
-        <use href="#hiruLine" class="draw ln" pathLength="1" style="--d:.2s" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-      </mask>
-      <g mask="url(#mkClose)" style="--logo-a:#EFE3CB;--logo-b:#D65A48"><use href="#hiru" x="188" y="355" width="648" height="210"/></g>
+      <g class="logo-draw" data-start=".2" data-dur="1.9" style="--logo-a:#EFE3CB;--logo-b:#D65A48"></g>
     </svg>
     <h2 class="words" style="--w0:2.2s">Eskerrik asko</h2>
     <div class="contact up" style="--d:2.6s">
@@ -943,6 +943,28 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   frames.forEach(function(f,i){var s=f.querySelector('.sn'); if(s) s.textContent=pad(i+1)+' / '+pad(N);});
+
+  // Isotipos que se dibujan (.logo-draw): copia los tres trazos del símbolo #hiru y los
+  // encadena pico izquierdo → lazo rojo → pico derecho (los extremos coinciden). Cada
+  // tramo dura en proporción a su longitud; el hueco del patrón es más largo que el
+  // trazo para que no asome el remate redondo antes de tiempo.
+  var sym=document.querySelector('#hiru > g');
+  [].forEach.call(document.querySelectorAll('.logo-draw'),function(g){
+    if(!sym) return;
+    var c=sym.cloneNode(true); g.appendChild(c);
+    var ps=c.querySelectorAll('path'); if(ps.length!==3 || !ps[0].getTotalLength) return;
+    var order=[ps[0],ps[2],ps[1]], lens=order.map(function(p){return p.getTotalLength();});
+    var total=lens.reduce(function(a,b){return a+b;},0), t=parseFloat(g.getAttribute('data-start'))||0, dur=parseFloat(g.getAttribute('data-dur'))||2;
+    order.forEach(function(p,k){
+      var L=lens[k], d=dur*L/total;
+      p.style.strokeDasharray=L+' '+(L+10);
+      p.style.setProperty('--off',(L+5)+'px');
+      p.style.setProperty('--dur',d+'s');
+      p.style.setProperty('--del',t+'s');
+      p.classList.add('logo-seg');
+      t+=d;
+    });
+  });
 
   [].forEach.call(document.querySelectorAll('.words'),function(el){
     var i=0, walk=function(node){
