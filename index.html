@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
 <style>
   :root{
     --beige:#DCCDB8;
@@ -222,7 +223,7 @@
   .doc-text h3{font-family:'Lora',serif;font-size:32px;color:var(--rojo);margin-bottom:24px;line-height:1.2}
   .doc-text p{font-size:15px;line-height:1.7;margin-bottom:16px}
   .doc-audiences{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
-  .doc-audience{padding:24px;background:var(--beige-claro);border-left:3px solid var(--rojo)}
+  .doc-audience{padding:24px;background:var(--beige-claro);border-top:2px solid var(--rojo);border-radius:4px}
   .doc-audience .roman{font-family:'Lora',serif;font-weight:700;color:var(--rojo);font-size:18px;margin-bottom:8px}
   .doc-audience h4{font-family:'Lora',serif;font-size:17px;color:var(--marron-oscuro);margin-bottom:8px}
   .doc-audience p{font-size:12px;line-height:1.5;margin:0}
@@ -322,6 +323,110 @@
     .lang-switch{margin-left:0;gap:8px}
   }
 
+  /* ---------- MOVIMIENTO ----------
+     Todo el estado "oculto antes de aparecer" cuelga de .js, para que sin
+     JavaScript la web se vea completa. .rv = aparece al entrar en pantalla;
+     .play = la sección ya está a la vista y arranca sus gráficos. */
+  .scroll-progress{position:fixed;top:0;left:0;right:0;height:2px;background:var(--rojo);transform:scaleX(0);transform-origin:left center;z-index:101;pointer-events:none}
+  .topbar nav a{transition:color .2s ease}
+  .topbar nav a.is-active{color:var(--rojo)}
+
+  .js .rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.1,1),transform .9s cubic-bezier(.2,.7,.1,1),clip-path 1.1s cubic-bezier(.6,0,.2,1);transition-delay:var(--d,0s)}
+  .js .rv.in{opacity:1;transform:none}
+  /* El título se desvela como una cortina; el recorte va en la animación (no en
+     el estado inicial) para que IntersectionObserver pueda detectarlo */
+  @keyframes title-wipe{from{clip-path:inset(0 0 100% 0);transform:translateY(24px)}to{clip-path:inset(0 0 -12% 0);transform:none}}
+  .js .section-title.rv.in{animation:title-wipe 1.1s cubic-bezier(.6,0,.2,1) var(--d,0s) both}
+
+  @keyframes h-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @keyframes h-pop{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:scale(1)}}
+  @keyframes h-fade{from{opacity:0}to{opacity:1}}
+  @keyframes h-leave{to{transform:translateX(56px);opacity:.3}}
+  @keyframes h-off{from{fill:#B22A1E}to{fill:#4A3E2E}}
+  @keyframes h-pulse{from{transform:scale(1);opacity:.6}to{transform:scale(1.7);opacity:0}}
+  @keyframes h-travel{from{left:0}to{left:calc(100% - 9px)}}
+  @keyframes v-in-a{from{transform:translate(-150px,-70px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes v-in-b{from{transform:translate(150px,-70px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes v-in-c{from{transform:translate(0,150px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes pin-in{from{opacity:0;transform:translate(-50%,-50%) scale(.4)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+  @keyframes pin-ring{from{transform:scale(1);opacity:.7}to{transform:scale(3.2);opacity:0}}
+
+  .js .g-draw{stroke-dasharray:1;stroke-dashoffset:1}
+  .play .g-draw{animation:h-draw 1.6s cubic-bezier(.6,0,.2,1) var(--d,0s) forwards}
+  .js .g-pop{opacity:0;transform-box:fill-box;transform-origin:center}
+  .play .g-pop{animation:h-pop .7s cubic-bezier(.3,1.45,.5,1) var(--d,0s) both}
+  .js .g-fade{opacity:0}
+  .play .g-fade{animation:h-fade 1s ease var(--d,0s) both}
+  .g-leave{transform-box:fill-box}
+  .play .g-leave{animation:h-leave 1.4s cubic-bezier(.5,0,.2,1) var(--d,1.4s) forwards}
+  .g-win{fill:#4A3E2E}
+  .js .g-win{fill:#B22A1E}
+  .play .g-win{animation:h-off 1s ease var(--d,1s) forwards}
+
+  /* Tensiones: gráfico de cada tensión + tarjeta que se eleva */
+  .t-g{height:120px;display:flex;align-items:flex-end;margin:0 0 20px}
+  .t-g svg{display:block;max-width:100%;height:auto;overflow:visible}
+  .tension{transition:transform .45s cubic-bezier(.2,.7,.1,1),box-shadow .45s ease}
+  .tension:hover{transform:translateY(-6px);box-shadow:0 22px 44px -28px rgba(74,62,46,.55)}
+
+  /* Venn: los tres círculos llegan desde fuera y se cruzan */
+  .js .venn .v-a,.js .venn .v-b,.js .venn .v-c{opacity:0}
+  .play .venn .v-a{animation:v-in-a 1.2s cubic-bezier(.2,.7,.1,1) .2s forwards}
+  .play .venn .v-b{animation:v-in-b 1.2s cubic-bezier(.2,.7,.1,1) .35s forwards}
+  .play .venn .v-c{animation:v-in-c 1.2s cubic-bezier(.2,.7,.1,1) .5s forwards}
+
+  /* Circuito: nodos que aparecen en orden y latido del centro */
+  .js .circuito-svg .c-node{opacity:0;transform-box:fill-box;transform-origin:center}
+  .play .circuito-svg .c-node{animation:h-pop .8s cubic-bezier(.3,1.45,.5,1) var(--d,0s) both}
+  .c-ring{transform-box:fill-box;transform-origin:center;animation:h-pulse 2.8s ease-out infinite}
+  .c-ring.late{animation-delay:1.4s}
+
+  /* Fases: la línea se dibuja y un punto recorre el camino */
+  .fases{position:relative}
+  .fases-track{position:absolute;left:0;right:0;top:38px;height:1px;background:rgba(110,95,71,.28);pointer-events:none}
+  .fases-runner{position:absolute;top:-4px;left:0;width:9px;height:9px;border-radius:50%;background:var(--rojo);animation:h-travel 9s ease-in-out infinite alternate}
+  .fase-line{position:relative}
+  .js .fase-line{transform:scaleX(0);transform-origin:left center;transition:transform 1s cubic-bezier(.6,0,.2,1) var(--d,0s)}
+  .js .fase.in .fase-line{transform:scaleX(1)}
+  .fase h3{transition:color .25s ease}
+  .fase:hover h3{color:var(--rojo)}
+
+  /* Mapa: chinchetas con pulso y triángulo que une los tres territorios */
+  /* -17px: cada chincheta se centra con su etiqueta, así que el punto rojo queda por encima de su coordenada */
+  .mapa-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;transform:translateY(-17px)}
+  .mapa-pin i{position:relative}
+  .mapa-pin i::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--rojo);animation:pin-ring 2.6s ease-out infinite;animation-delay:var(--d,0s)}
+  .js .mapa-pin{opacity:0}
+  .play .mapa-pin{animation:pin-in .7s cubic-bezier(.3,1.45,.5,1) var(--d,0s) both}
+
+  /* Documental y alianza */
+  .doc-audience{transition:transform .45s cubic-bezier(.2,.7,.1,1),box-shadow .45s ease}
+  .doc-audience:hover{transform:translateY(-4px);box-shadow:0 18px 36px -26px rgba(74,62,46,.55)}
+  .js .alianza-sep{transform:scaleX(0);transition:transform 1.1s cubic-bezier(.6,0,.2,1) .5s}
+  .play .alianza-sep{transform:scaleX(1)}
+  .alianza-actor .logo{transition:transform .45s cubic-bezier(.2,.7,.1,1)}
+  .alianza-actor:hover .logo{transform:scale(1.06)}
+
+  /* Contacto: el isotipo se dibuja con su propio trazo */
+  .js .contacto-logo path,.js .alianza-actor.center svg path{stroke-dasharray:1;stroke-dashoffset:1}
+  .play .contacto-logo path,.play .alianza-actor.center svg path{animation:h-draw 2s cubic-bezier(.6,0,.2,1) .2s forwards}
+  .play .contacto-logo path:last-child,.play .alianza-actor.center svg path:last-child{animation-duration:2.4s;animation-delay:.9s}
+
+  @media(max-width:760px){
+    .fases-track{display:none}
+    .t-g{height:auto;margin-bottom:16px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .js .rv{opacity:1;transform:none}
+    .js .g-draw,.js .contacto-logo path,.js .alianza-actor.center svg path{stroke-dashoffset:0}
+    .js .g-pop,.js .g-fade,.js .mapa-pin,.js .venn .v-a,.js .venn .v-b,.js .venn .v-c,.js .circuito-svg .c-node{opacity:1}
+    .js .fase-line,.js .alianza-sep{transform:none}
+    .js .g-win{fill:#4A3E2E}
+    .fases-runner,.c-ring{display:none}
+  }
+
 </style>
 </head>
 <body class="lang-eu">
@@ -387,10 +492,14 @@
 
       <div class="mapa-img-wrap">
         <img src="data:image/png;base64,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" alt="Mapa de Euskadi con los tres territorios" class="mapa-img">
+        <!-- Triángulo que une los tres territorios (mismas coordenadas que las chinchetas) -->
+        <svg class="mapa-links" viewBox="0 0 812 603" preserveAspectRatio="none" aria-hidden="true">
+          <path class="g-draw" pathLength="1" style="--d:1.1s" d="M276 145 L536 145 L406 392 Z" fill="none" stroke="#B22A1E" stroke-width="1.6" stroke-linejoin="round" stroke-opacity=".7"/>
+        </svg>
         <!-- Red points + labels overlay -->
-        <span class="mapa-pin" style="left:34%;top:24%"><i></i><b>Bizkaia</b></span>
-        <span class="mapa-pin" style="left:66%;top:24%"><i></i><b>Gipuzkoa</b></span>
-        <span class="mapa-pin" style="left:50%;top:65%"><i></i><b>Araba</b></span>
+        <span class="mapa-pin" style="left:34%;top:24%;--d:.3s"><i></i><b>Bizkaia</b></span>
+        <span class="mapa-pin" style="left:66%;top:24%;--d:.55s"><i></i><b>Gipuzkoa</b></span>
+        <span class="mapa-pin" style="left:50%;top:65%;--d:.8s"><i></i><b>Araba</b></span>
       </div>
       <div class="eu-only mapa-caption">Euskadi · 3 lurralde · 3 ostatu</div><div class="es-only mapa-caption">Euskadi · 3 territorios · 3 alojamientos</div>
     </div>
@@ -407,18 +516,47 @@
     <div class="tensiones">
       <div class="tension">
         <div class="num">01</div>
+        <div class="t-g" aria-hidden="true">
+          <svg width="300" height="96" viewBox="0 0 300 96">
+            <g stroke="rgba(110,95,71,.25)" stroke-width="1"><line x1="0" y1="92" x2="300" y2="92"/><line x1="0" y1="62" x2="300" y2="62" stroke-dasharray="3 5"/><line x1="0" y1="32" x2="300" y2="32" stroke-dasharray="3 5"/></g>
+            <path class="g-draw" pathLength="1" style="--d:.5s" d="M2 88 C 80 84 150 72 210 52 L 280 18" fill="none" stroke="#B22A1E" stroke-width="3" stroke-linecap="round"/>
+            <path class="g-pop" style="--d:1.9s" d="M268 12 L292 8 L282 30 Z" fill="#B22A1E"/>
+          </svg>
+        </div>
         <h3 class="eu-only">Turismoa goien mailan</h3><h3 class="es-only">Turismo en máximos</h3>
         <p class="eu-only">Euskadi bost milioi bisitarira hurbiltzen ari da, urtero %4-5 inguru haziz. Bisitari kopurua lurraldeak haiek integratzeko duen gaitasuna baino azkarrago hazten ari da, eta horrek masifikazioa eta gizarte-ezinegona eragiten ditu.</p><p class="es-only">Euskadi roza los cinco millones de visitantes y crece en torno a un 4-5% cada año. La afluencia aumenta más rápido que la capacidad del territorio para integrarla, generando masificación y malestar social.</p>
-        <span class="eu-only stat">≈ 5 M bisitari / urtean</span><span class="es-only stat">≈ 5 M visitantes / año</span>
+        <span class="eu-only stat">≈ <span data-count="5">5</span> M bisitari / urtean</span><span class="es-only stat">≈ <span data-count="5">5</span> M visitantes / año</span>
       </div>
       <div class="tension">
         <div class="num">02</div>
+        <div class="t-g" aria-hidden="true">
+          <svg width="300" height="104" viewBox="0 0 300 104">
+            <g fill="#4A3E2E">
+              <g transform="translate(30 50)"><circle cy="-30" r="14"/><path d="M-22 52 V8 a22 22 0 0 1 44 0 V52 Z"/></g>
+              <g transform="translate(92 50)"><circle cy="-30" r="14"/><path d="M-22 52 V8 a22 22 0 0 1 44 0 V52 Z"/></g>
+              <g transform="translate(154 50)"><circle cy="-30" r="14"/><path d="M-22 52 V8 a22 22 0 0 1 44 0 V52 Z"/></g>
+            </g>
+            <g class="g-leave" style="--d:1.3s"><g transform="translate(216 50)" fill="#B22A1E"><circle cy="-30" r="14"/><path d="M-22 52 V8 a22 22 0 0 1 44 0 V52 Z"/></g></g>
+          </svg>
+        </div>
         <h3 class="eu-only">Talentuaren ihesa</h3><h3 class="es-only">Fuga de talento</h3>
         <p class="eu-only">Lau tituludunetatik batek kanpoan garatzen du bere ibilbidea. Lurraldeak baliabide publikoak inbertitzen ditu talentua trebatzen; alde egiten duenean, beste leku batek kapitalizatzen du inbertsio hori.</p><p class="es-only">Uno de cada cuatro titulados acaba desarrollando su carrera fuera. El territorio invierte recursos públicos en formar talento; cuando se marcha, esa inversión la capitaliza otro lugar.</p>
         <span class="eu-only stat">4 tituludunetatik 1</span><span class="es-only stat">1 de cada 4 titulados</span>
       </div>
       <div class="tension">
         <div class="num">03</div>
+        <div class="t-g" aria-hidden="true">
+          <svg width="300" height="110" viewBox="0 0 300 110">
+            <g stroke="#4A3E2E" stroke-width="2.2" fill="#DCCDB8" stroke-linejoin="round">
+              <path d="M6 108 V48 L46 18 L86 48 V108 Z"/>
+              <path d="M108 108 V36 L150 6 L192 36 V108 Z"/>
+              <path d="M214 108 V54 L254 26 L294 54 V108 Z"/>
+            </g>
+            <rect class="g-win" style="--d:.8s" x="22" y="58" width="14" height="18"/><rect class="g-win" style="--d:1s" x="56" y="58" width="14" height="18"/><rect class="g-win" style="--d:1.2s" x="37" y="84" width="18" height="24"/>
+            <rect class="g-win" style="--d:1.1s" x="124" y="48" width="14" height="18"/><rect class="g-win" style="--d:1.3s" x="162" y="48" width="14" height="18"/><rect class="g-win" style="--d:1.5s" x="141" y="78" width="18" height="30"/>
+            <rect class="g-win" style="--d:1.4s" x="230" y="64" width="14" height="18"/><rect class="g-win" style="--d:1.6s" x="264" y="64" width="14" height="18"/><rect class="g-win" style="--d:1.8s" x="245" y="88" width="18" height="20"/>
+          </svg>
+        </div>
         <h3 class="eu-only">Erabilerarik gabeko ondarea</h3><h3 class="es-only">Patrimonio en desuso</h3>
         <p class="eu-only">Balio historiko eta kulturala duten eraikinak itxita daude hiru lurralde historikoetan —Gipuzkoa, Bizkaia eta Araba—, erabilerarik eta etorkizun-proiekturik gabe.</p><p class="es-only">Edificios con valor histórico y cultural permanecen cerrados en los tres territorios históricos —Gipuzkoa, Bizkaia y Araba—, sin uso ni proyecto de futuro.</p>
         <span class="eu-only stat">Hiru lurralde, arazo bera</span><span class="es-only stat">Tres territorios, mismo problema</span>
@@ -448,23 +586,24 @@
         </defs>
 
         <!-- 3 base circles (light tint) -->
-        <circle cx="250" cy="260" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
-        <circle cx="390" cy="260" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
-        <circle cx="320" cy="380" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
+        <circle class="v-a" cx="250" cy="260" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
+        <circle class="v-b" cx="390" cy="260" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
+        <circle class="v-c" cx="320" cy="380" r="170" fill="#B22A1E" fill-opacity="0.14" stroke="#B22A1E" stroke-width="1.5"/>
 
         <!-- Triple intersection: rect clipped by all three circles -->
-        <g clip-path="url(#cA)">
+        <g class="g-fade" style="--d:1.5s"><g clip-path="url(#cA)">
           <g clip-path="url(#cB)">
             <g clip-path="url(#cC)">
               <rect x="0" y="0" width="640" height="620" fill="#8C2018"/>
             </g>
           </g>
-        </g>
+        </g></g>
 
         <!-- HIRU in negative on the central darker shape -->
-        <text x="320" y="315" font-family="Lora" font-weight="700" font-size="32" fill="#DCCDB8" text-anchor="middle" letter-spacing="0.04em">HIRU</text>
+        <text class="g-pop" style="--d:1.9s" x="320" y="315" font-family="Lora" font-weight="700" font-size="32" fill="#DCCDB8" text-anchor="middle" letter-spacing="0.04em">HIRU</text>
 
         <!-- External labels with leader lines -->
+        <g class="g-fade" style="--d:1.2s">
         <line x1="125" y1="120" x2="170" y2="170" stroke="#6E5F47" stroke-width="1"/>
         <text class="eu-only" x="120" y="100" font-family="Lora" font-weight="700" font-size="22" fill="#B22A1E" text-anchor="end">Hezkuntza</text><text class="es-only" x="120" y="100" font-family="Lora" font-weight="700" font-size="22" fill="#B22A1E" text-anchor="end">Educación</text>
         <text class="eu-only" x="120" y="118" font-family="Poppins" font-size="10" fill="#6E5F47" text-anchor="end" letter-spacing="1.5">AGET · UPV/EHU</text><text class="es-only" x="120" y="118" font-family="Poppins" font-size="10" fill="#6E5F47" text-anchor="end" letter-spacing="1.5">ETSA · UPV/EHU</text>
@@ -476,6 +615,7 @@
         <line x1="320" y1="555" x2="320" y2="530" stroke="#6E5F47" stroke-width="1"/>
         <text class="eu-only" x="320" y="585" font-family="Lora" font-weight="700" font-size="22" fill="#B22A1E" text-anchor="middle">Ondarea</text><text class="es-only" x="320" y="585" font-family="Lora" font-weight="700" font-size="22" fill="#B22A1E" text-anchor="middle">Patrimonio</text>
         <text class="eu-only" x="320" y="603" font-family="Poppins" font-size="10" fill="#6E5F47" text-anchor="middle" letter-spacing="1.5">BIZIBERRITUA</text><text class="es-only" x="320" y="603" font-family="Poppins" font-size="10" fill="#6E5F47" text-anchor="middle" letter-spacing="1.5">REVITALIZADO</text>
+        </g>
       </svg>
     </div>
   </div>
@@ -508,6 +648,8 @@
         </circle>
 
         <!-- Center -->
+        <circle class="c-ring" cx="300" cy="300" r="68" fill="none" stroke="#B22A1E" stroke-width="1.5"/>
+        <circle class="c-ring late" cx="300" cy="300" r="68" fill="none" stroke="#B22A1E" stroke-width="1.5"/>
         <circle cx="300" cy="300" r="68" fill="#B22A1E"/>
         <text x="300" y="310" font-family="Lora" font-weight="700" font-size="30" fill="#DCCDB8" text-anchor="middle">HIRU</text>
 
@@ -526,22 +668,22 @@
         </g>
 
         <!-- 4 nodes (bigger) — clockwise: AULA → TERRITORIO → TURISMO → CIUDADANÍA -->
-        <g>
+        <g class="c-node" style="--d:.2s">
           <circle cx="300" cy="70" r="60" fill="#EFE3CB" stroke="#B22A1E" stroke-width="1.5"/>
           <text class="eu-only" x="300" y="66" font-family="Lora" font-weight="700" font-size="13" fill="#B22A1E" text-anchor="middle">IKASGELA</text><text class="es-only" x="300" y="66" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">AULA</text>
           <text class="eu-only" x="300" y="85" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">AGET · EHU</text><text class="es-only" x="300" y="85" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">ETSA · EHU</text>
         </g>
-        <g>
+        <g class="c-node" style="--d:.45s">
           <circle cx="530" cy="300" r="60" fill="#EFE3CB" stroke="#B22A1E" stroke-width="1.5"/>
           <text class="eu-only" x="530" y="296" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">LURRALDEA</text><text class="es-only" x="530" y="296" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">TERRITORIO</text>
           <text class="eu-only" x="530" y="315" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">ondarea</text><text class="es-only" x="530" y="315" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">patrimonio</text>
         </g>
-        <g>
+        <g class="c-node" style="--d:.7s">
           <circle cx="300" cy="530" r="60" fill="#EFE3CB" stroke="#B22A1E" stroke-width="1.5"/>
           <text class="eu-only" x="300" y="526" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">TURISMOA</text><text class="es-only" x="300" y="526" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">TURISMO</text>
           <text class="eu-only" x="300" y="545" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">iraunkorra</text><text class="es-only" x="300" y="545" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">sostenible</text>
         </g>
-        <g>
+        <g class="c-node" style="--d:.95s">
           <circle cx="70" cy="300" r="60" fill="#EFE3CB" stroke="#B22A1E" stroke-width="1.5"/>
           <text class="eu-only" x="70" y="296" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">HERRITARRAK</text><text class="es-only" x="70" y="296" font-family="Lora" font-weight="700" font-size="15" fill="#B22A1E" text-anchor="middle">CIUDADANÍA</text>
           <text class="eu-only" x="70" y="315" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">harrotasun komuna</text><text class="es-only" x="70" y="315" font-family="Poppins" font-size="9.5" fill="#6E5F47" text-anchor="middle">orgullo común</text>
@@ -560,6 +702,7 @@
     <p class="eu-only section-lead">Bidaia bat: fase bakoitzak bere kabuz balioa ekartzen du eta, kateatuz, zirkulua ixten dute.</p><p class="es-only section-lead">Un viaje en el que cada fase aporta valor por sí misma y, encadenadas, cierran el círculo.</p>
 
     <div class="fases">
+      <div class="fases-track" aria-hidden="true"><span class="fases-runner"></span></div>
       <div class="fase">
         <div class="eu-only fase-num">01 FASEA</div><div class="es-only fase-num">FASE 01</div>
         <div class="fase-line"></div>
@@ -783,6 +926,126 @@ updateTopbar();
     a.setAttribute('href', 'mailto:' + addr);
     a.textContent = addr;
   }
+})();
+
+/* ---------- MOVIMIENTO ----------
+   Solo añade clases: el texto de la web no se toca. */
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasIO = 'IntersectionObserver' in window;
+  var each = function(sel, fn, root){ [].forEach.call((root || document).querySelectorAll(sel), fn); };
+
+  // Barra fina de progreso de lectura bajo la topbar
+  var bar = document.createElement('div');
+  bar.className = 'scroll-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  function progress(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ')';
+  }
+  window.addEventListener('scroll', progress, {passive:true});
+  window.addEventListener('resize', progress);
+  progress();
+
+  // Los isotipos que se dibujan necesitan cada trazo normalizado a longitud 1
+  each('.contacto-logo path, .alianza-actor.center svg path', function(p){ p.setAttribute('pathLength', '1'); });
+
+  // Contadores (≈ 5 M): suben hasta su valor y terminan con el texto original
+  function counters(root){
+    each('[data-count]', function(el){
+      var final = el.getAttribute('data-count'), target = parseFloat(final), t0 = null;
+      function step(t){
+        if(!t0) t0 = t;
+        var k = Math.min(1, (t - t0) / 1400), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = k < 1 ? (target * e).toFixed(1).replace('.', ',') : final;
+        if(k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }, root);
+  }
+
+  // Bloques cuyos gráficos arrancan al verse
+  var stages = '.tension, .venn-wrap, .circuito, .mapa-img-wrap, .alianza-illu, .contacto';
+
+  if(!hasIO || reduce){
+    each(stages, function(el){ el.classList.add('play'); });
+    return;
+  }
+
+  // Elementos que aparecen al entrar en pantalla, escalonados entre hermanos
+  var groups = [
+    '.label', '.section-title', '.section-lead',
+    '.mapa-text > *', '.mapa-img-wrap', '.mapa-caption',
+    '.tension', '.venn-text > *', '.circuito-text > *', '.fase',
+    '.doc-text > *', '.doc-audience',
+    '#alianza .container > div[style] > div', '.alianza-illu',
+    '.contacto .hiru-big', '.contacto .claim', '.contacto-email'
+  ];
+  var items = [];
+  groups.forEach(function(sel){
+    each(sel, function(el){
+      if(el.classList.contains('rv')) return;
+      el.classList.add('rv');
+      items.push(el);
+    });
+  });
+  items.forEach(function(el){
+    // Las parejas eu/es cuentan como un solo paso del escalonado
+    var i = 0, s = el.previousElementSibling;
+    while(s){ if(s.classList.contains('rv') && !s.classList.contains('es-only')) i++; s = s.previousElementSibling; }
+    if(el.classList.contains('es-only')) i = Math.max(0, i - 1);
+    el.style.setProperty('--d', Math.min(i * 0.12, 0.6) + 's');
+  });
+
+  function reveal(el){
+    if(el.classList.contains('in')) return;
+    el.classList.add('in');
+    var d = parseFloat(el.style.getPropertyValue('--d')) || 0;
+    // Al terminar se quita .rv para que los :hover funcionen sin retardo
+    setTimeout(function(){ el.classList.remove('rv'); }, (d + 1.3) * 1000);
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); reveal(e.target); } });
+  }, {rootMargin:'0px 0px -8% 0px', threshold:0.12});
+  items.forEach(function(el){ io.observe(el); });
+
+  var so = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      so.unobserve(e.target);
+      e.target.classList.add('play');
+      counters(e.target);
+    });
+  }, {rootMargin:'0px 0px -10% 0px', threshold:0.25});
+  each(stages, function(el){ so.observe(el); });
+
+  // Enlace de la topbar activo según la sección a la vista
+  var links = {};
+  each('.topbar nav a[href^="#"]', function(a){
+    var id = a.getAttribute('href').slice(1);
+    (links[id] = links[id] || []).push(a);
+  });
+  var no = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      Object.keys(links).forEach(function(k){
+        links[k].forEach(function(a){ a.classList.toggle('is-active', k === e.target.id); });
+      });
+    });
+  }, {rootMargin:'-45% 0px -50% 0px'});
+  each('section[id]', function(s){ no.observe(s); });
+
+  // Al cambiar de idioma, lo que ya quedó atrás aparece sin esperar al scroll
+  var baseSetLang = window.setLang;
+  window.setLang = function(lang){
+    baseSetLang(lang);
+    items.forEach(function(el){
+      if(el.classList.contains('in')) return;
+      var r = el.getBoundingClientRect();
+      if(r.height && r.top < window.innerHeight) reveal(el);
+    });
+  };
 })();
 </script>
 </body>
