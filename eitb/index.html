@@ -6,7 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <title>HIRU · Ikasgelatik lurraldera</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -136,16 +137,14 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 .mega em::after{content:"";position:absolute;left:0;right:0;bottom:-.02em;height:6px;background:var(--rojo);transform-origin:left center}
 .play .mega em::after{animation:grow 1s cubic-bezier(.6,0,.2,1) 1.4s both}
 
-/* La historia: titular y texto a la izquierda, vídeo con sonido a la derecha */
-.story{flex:1;min-height:0;display:grid;grid-template-columns:600px 1fr;gap:64px;align-items:center}
-.story .mega{font-size:62px;margin:0 0 30px;max-width:none}
-.story .lead{font-size:20px;max-width:none}
-.film{position:relative;margin:0;border-radius:6px;overflow:hidden;background:var(--noche);aspect-ratio:16/9;box-shadow:0 30px 60px -32px rgba(35,29,22,.7);cursor:pointer}
+/* Vídeo a pantalla completa (diapositiva 2) */
+.film-slide{background:var(--noche)}
+.film{position:absolute;inset:0;margin:0;cursor:pointer}
 .film video{width:100%;height:100%;display:block;object-fit:cover}
-.snd{position:absolute;right:16px;bottom:16px;display:inline-flex;align-items:center;gap:10px;background:rgba(35,29,22,.6);border:1px solid rgba(239,227,203,.55);color:var(--crema);
-  border-radius:999px;padding:11px 18px;font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.snd{position:absolute;right:48px;bottom:40px;display:inline-flex;align-items:center;gap:10px;background:rgba(35,29,22,.55);border:1px solid rgba(239,227,203,.55);color:var(--crema);
+  border-radius:999px;padding:13px 20px;font:700 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .snd:hover{border-color:var(--crema)}
-.snd svg{width:15px;height:15px;display:block}
+.snd svg{width:16px;height:16px;display:block}
 .snd .ic-on{display:none}
 .snd[aria-pressed="true"] .ic-on{display:block}
 .snd[aria-pressed="true"] .ic-off{display:none}
@@ -330,10 +329,6 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 
 <!-- ============ 1 · PORTADA ============ -->
 <div class="frame" tabindex="-1"><section class="slide cover dark" aria-label="Portada">
-  <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
-    <source src="/video.mp4" type="video/mp4">
-  </video>
-  <div class="shade"></div>
   <div class="lb t"></div><div class="lb b"></div>
   <div class="slate fade" style="--d:1s">HIRU · Dokumentala</div>
   <div class="rec fade" style="--d:1.2s"><i></i>REC <span class="tc">00:00:00:00</span></div>
@@ -353,18 +348,11 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
   <div class="lb-cap r fade" style="--d:1.4s">Euskara · 2026 — 2029</div>
 </section></div>
 
-<!-- ============ 2 · LA HISTORIA ============ -->
-<div class="frame" tabindex="-1"><section class="slide" aria-label="La historia">
-  <div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="in">
-    <p class="eyebrow up">La historia</p>
-    <div class="story">
-      <div>
-        <h2 class="mega words" style="--w0:.25s">El talento que forma Euskadi, <em>construyendo</em> Euskadi.</h2>
-        <p class="lead up" style="--d:1.7s">HIRU es el sistema que retiene ese talento: estudiantes de Arquitectura de la EHU recuperan patrimonio en desuso y lo convierten en alojamientos donde quien viaja no consume el territorio: lo habita, conoce a su gente y se lleva su historia. Este documental cuenta todo el recorrido, del aula al territorio, desde el primer día.</p>
-      </div>
-      <figure class="film up" style="--d:.5s">
-        <video class="story-video" id="storyVideo" playsinline preload="metadata">
+<!-- ============ 2 · EL VÍDEO ============
+     A pantalla completa y con sonido: arranca al llegar a la diapositiva y se para al salir. -->
+<div class="frame" tabindex="-1"><section class="slide film-slide" aria-label="Vídeo de HIRU">
+      <figure class="film">
+        <video class="story-video" id="storyVideo" playsinline preload="auto">
           <source src="/video.mp4" type="video/mp4">
         </video>
         <button type="button" class="snd" id="storySnd" aria-pressed="false" aria-label="Activar o quitar el sonido">
@@ -373,7 +361,15 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
           <span>Sonido</span>
         </button>
       </figure>
-    </div>
+</section></div>
+
+<!-- ============ 3 · LA HISTORIA ============ -->
+<div class="frame" tabindex="-1"><section class="slide" aria-label="La historia">
+  <div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="in">
+    <p class="eyebrow up">La historia</p>
+    <h2 class="mega words" style="--w0:.25s">El talento que forma Euskadi, <em>construyendo</em> Euskadi.</h2>
+    <p class="lead up" style="--d:1.7s;font-size:25px;max-width:960px">HIRU es el sistema que retiene ese talento: estudiantes de Arquitectura de la EHU recuperan patrimonio en desuso y lo convierten en alojamientos donde quien viaja no consume el territorio: lo habita, conoce a su gente y se lleva su historia. Este documental cuenta todo el recorrido, del aula al territorio, desde el primer día.</p>
   </div>
   <div class="foot"><svg><use href="#hiru"/></svg><span>HIRU · Ikasgelatik lurraldera</span><span class="sn"></span></div>
 </section></div>
@@ -932,7 +928,7 @@ body{margin:0;background:var(--tinta);color:var(--oscuro);font-family:var(--sans
 
 <nav class="bar" aria-label="Controles de la presentación">
   <button type="button" id="prev" aria-label="Diapositiva anterior">← Anterior</button>
-  <span class="count" id="count" aria-live="polite">01 / 17</span>
+  <span class="count" id="count" aria-live="polite">01 / 18</span>
   <button type="button" id="next" aria-label="Diapositiva siguiente">Siguiente →</button>
   <button type="button" id="ovBtn" aria-pressed="false">Ver todas</button>
 </nav>
